@@ -1,10 +1,11 @@
 
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>11+ Verbal Reasoning Exam Practice</title>
+  <title>11+ Verbal Reasoning Practice</title>
   <style>
     :root { --ink:#141414; --muted:#555; --paper:#fff; --soft:#f5f7fb; --line:#cfd6e2; --accent:#264f9e; --accent-soft:#eaf0ff; --good:#16803a; --bad:#bf2b2b; --amber:#9a6a00; --shadow:0 12px 28px rgba(0,0,0,.10); }
     * { box-sizing:border-box; }
@@ -14,15 +15,12 @@
     .exam-cover { padding:28px; border-radius:18px; }
     .cover-title { border:2px solid #111; padding:18px; text-align:center; margin-bottom:22px; }
     h1 { margin:0; font-size:clamp(1.9rem,4vw,3rem); letter-spacing:.02em; text-transform:uppercase; }
-    .subtitle { margin:8px 0 0; color:var(--muted); font-size:1rem; }
     .instruction-box { border:1.5px solid #111; padding:16px 18px; margin:20px 0; line-height:1.5; }
     .instruction-box h2, .panel h2 { margin:0 0 10px; }
-    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:18px 0; }
-    .stat { border:1px solid var(--line); background:var(--soft); padding:14px; border-radius:12px; }
-    .stat strong { display:block; font-size:1.7rem; color:var(--accent); }
     button, select { font:inherit; }
     button { border:0; border-radius:10px; padding:12px 16px; background:var(--accent); color:#fff; font-weight:700; cursor:pointer; }
-    button:hover:not(:disabled), button:focus-visible:not(:disabled) { filter:brightness(.96); outline:2px solid rgba(38,79,158,.22); }
+    button:hover:not(:disabled) { filter:brightness(.96); }
+    button:focus-visible:not(:disabled), select:focus-visible { outline:3px solid #ffbf47; outline-offset:3px; }
     button:disabled { opacity:.65; cursor:not-allowed; }
     .secondary { background:#fff; color:#111; border:1px solid var(--line); }
     .danger { background:#b42929; }
@@ -33,7 +31,7 @@
     .meter { height:10px; border:1px solid var(--line); border-radius:99px; background:#eef1f7; overflow:hidden; margin-top:10px; }
     .meter-fill { height:100%; width:0%; background:var(--accent); transition:width .2s ease; }
     .nav-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:5px; margin-top:12px; }
-    .nav-btn { padding:8px 0; border-radius:7px; background:#fff; color:#111; border:1px solid var(--line); font-size:.86rem; box-shadow:none; }
+    .nav-btn { min-width:42px; min-height:42px; padding:8px 0; border-radius:7px; background:#fff; color:#111; border:1px solid var(--line); font-size:.86rem; box-shadow:none; }
     .nav-btn.current { outline:2px solid #111; font-weight:900; }
     .nav-btn.answered { background:var(--accent-soft); border-color:#8ba8e9; }
     .nav-btn.flagged::after { content:' ⚑'; color:#b42929; }
@@ -100,97 +98,29 @@
     .mark { font-weight:900; white-space:nowrap; } .mark.ok { color:var(--good); } .mark.no { color:var(--bad); }
     .print-only { display:none; }
     @media(max-width:850px) { .question-wrap { grid-template-columns:1fr; } .side-card { position:static; } .topbar { position:static; } }
-    @media print { body { background:#fff; } .topbar,.actions,.side-card,.question-card,.exam-cover { display:none!important; } .print-only { display:block; } .panel { box-shadow:none; border:0; } }
+    @media print { body { background:#fff; } .topbar,.actions,.side-card,.question-card,.exam-cover,#resultsScreen>.panel>.result-hero,#resultsScreen>.panel>h2,#resultsScreen>.panel>.heat-grid,#resultsScreen>.panel>#overallFeedback,#resultsScreen>.panel>.review-list { display:none!important; } .print-only { display:block; } .panel { box-shadow:none; border:0; } }
   </style>
 </head>
 <body>
   <main class="app">
-    <section class="screen" id="startScreen"><div class="exam-cover"><div class="cover-title"><h1>11+ Verbal Reasoning Paper</h1><p class="subtitle">Exam practice for GL/CEM/independent-style verbal reasoning used in England</p></div><div class="instruction-box"><h2>Read this carefully</h2><p>There are 80 questions. You have 50 minutes. Choose your answer by selecting options on the screen. Some questions ask you to select more than one answer, match items, or put tiles in order. There are no typed answers.</p><p>Work quickly and carefully. If you cannot do a question, flag it and go on. You can return before finishing the test. Each question is worth 1 mark. There is no negative marking.</p></div><div class="stat-grid"><div class="stat"><strong id="bankCount">Loading…</strong> question variants</div><div class="stat"><strong>80</strong> questions</div><div class="stat"><strong>50</strong> minutes</div><div class="stat"><strong>R/A/G</strong> topic heat map</div></div><div class="actions"><button id="startBtn" type="button">Start full verbal reasoning test</button><button class="secondary" id="sampleBtn" type="button">Start short 25-question sample</button></div></div></section>
-    <section class="screen hidden" id="examScreen"><div class="topbar"><div class="toprow"><div><strong id="examTitle">Verbal Reasoning Test</strong> · <span id="progressText">Question 1 of 80</span> · <span id="answeredText">0 answered</span></div><div class="timer" id="timer">50:00</div></div><div class="meter"><div class="meter-fill" id="progressFill"></div></div><div class="nav-grid" id="questionNav"></div></div><div class="question-wrap"><article class="panel question-card" id="questionPanel"><div class="q-number" id="questionNumber">Question 1</div><div class="tag-row" id="tagRow"></div><div class="stimulus" id="stimulusBox"></div><p class="question-text" id="questionText"></p><div id="answerArea"></div><div class="feedback hidden" id="reviewFeedback"></div><div class="actions"><button class="secondary" id="prevBtn" type="button">Previous</button><button class="secondary" id="flagBtn" type="button">Flag question</button><button id="nextBtn" type="button">Next</button><button class="danger" id="finishBtn" type="button">Finish test</button></div></article><aside class="panel side-card"><h2>Answer sheet</h2><p class="answer-summary" id="sideSummary">Select an answer, then move to the next question.</p><div id="miniReview"></div></aside></div></section>
-    <section class="screen hidden" id="resultsScreen"><div class="panel"><div class="result-hero"><h2>Verbal reasoning test complete</h2><div class="big-score" id="scoreDisplay">0/80</div><p id="percentDisplay"></p></div><h2>Topic heat map</h2><div class="heat-grid" id="heatMap"></div><div class="feedback" id="overallFeedback"></div><h2 style="margin-top:20px">Question review summary</h2><div class="review-list" id="resultsReviewList"></div><div class="actions"><button id="downloadPdfBtn" type="button">Download PDF results</button><button class="secondary" id="reviewBtn" type="button">Review questions one at a time</button><button class="secondary" id="retakeBtn" type="button">Start a new test</button></div><div class="print-only" id="printResults"></div></div></section>
+    <section class="screen" id="startScreen"><div class="exam-cover"><div class="cover-title"><h1>11+ Verbal Reasoning</h1></div><div class="instruction-box"><h2>Before you begin</h2><p>Choose one answer unless the question tells you otherwise. Some questions ask you to choose more than one answer, match words or put tiles in order.</p><p>Work carefully. If you are unsure, flag the question and return to it later. You do not lose marks for a wrong answer.</p></div><div class="actions"><button id="startBtn" type="button">Start full practice — 80 questions, 50 minutes</button><button class="secondary" id="sampleBtn" type="button">Start short practice — 25 questions, 20 minutes</button></div></div></section>
+    <section class="screen hidden" id="examScreen"><div class="topbar"><div class="toprow"><div><strong id="examTitle">Verbal Reasoning</strong> · <span id="progressText">Question 1 of 80</span> · <span id="answeredText">0 answered</span></div><div class="timer" id="timer" role="timer" aria-label="Time remaining">50:00</div></div><div class="meter" role="progressbar" aria-label="Question progress" aria-valuemin="1" aria-valuemax="80" aria-valuenow="1"><div class="meter-fill" id="progressFill"></div></div><div class="nav-grid" id="questionNav" aria-label="Question navigation"></div></div><div class="question-wrap"><article class="panel question-card" id="questionPanel" tabindex="-1"><h2 class="q-number" id="questionNumber">Question 1</h2><div class="tag-row" id="tagRow"></div><div class="stimulus" id="stimulusBox"></div><p class="question-text" id="questionText"></p><div id="answerArea"></div><div class="feedback hidden" id="reviewFeedback" aria-live="polite"></div><div class="actions"><button class="secondary" id="prevBtn" type="button">Previous</button><button class="secondary" id="flagBtn" type="button">Flag question</button><button id="nextBtn" type="button">Next</button><button class="danger" id="finishBtn" type="button">Finish practice</button></div></article><aside class="panel side-card"><h2>Your answers</h2><p class="answer-summary" id="sideSummary">Select an answer, then move to the next question.</p><div id="miniReview"></div></aside></div></section>
+    <section class="screen hidden" id="resultsScreen"><div class="panel"><div class="result-hero"><h2>Practice complete</h2><div class="big-score" id="scoreDisplay">0/80</div><p id="percentDisplay"></p></div><h2>How you did by topic</h2><div class="heat-grid" id="heatMap"></div><div class="feedback" id="overallFeedback"></div><h2 style="margin-top:20px">Questions to review</h2><div class="review-list" id="resultsReviewList"></div><div class="actions"><button id="downloadPdfBtn" type="button">Download results as a PDF</button><button class="secondary" id="reviewBtn" type="button">Review each question</button><button class="secondary" id="retakeBtn" type="button">Choose another practice</button></div><div class="print-only" id="printResults"></div></div></section>
   </main>
   <script>
     const TOPICS = {
-      vocab: { name: "Vocabulary & Word Meanings", icon: "📚", blurb: "Synonyms, antonyms, homophones, word meanings, prefixes and precise vocabulary." },
-      analogies: { name: "Analogies & Relationships", icon: "🔗", blurb: "Word pairs, part-whole links, opposites, functions, categories and relationships." },
-      classification: { name: "Odd One Out & Categories", icon: "🧠", blurb: "Find the word that does not belong, choose matching groups, and spot shared features." },
-      compounds: { name: "Compound Words & Word Pairs", icon: "🧱", blurb: "Build compound words, find shared words, and match word halves." },
-      codes: { name: "Letter Codes", icon: "🔐", blurb: "Alphabet positions, shifting letters, reverse alphabet, coded words and code tables." },
-      sequences: { name: "Letter & Number Sequences", icon: "➡️", blurb: "Alphabet patterns, alternating sequences, word order, numbered letters and missing terms." },
-      wordplay: { name: "Hidden Words & Anagrams", icon: "🔎", blurb: "Anagrams, hidden words, letter removal, alphabet order and word construction." },
-      logic: { name: "Logic & Deduction", icon: "♟️", blurb: "Ordering clues, statements, matching puzzles, following instructions and conclusions." },
-      mixed: { name: "Mixed Practice", icon: "⭐", blurb: "A shuffled round across the full 11+ verbal reasoning practice bank." }
+      vocab: { name: "Vocabulary & Word Meanings" },
+      analogies: { name: "Analogies & Relationships" },
+      classification: { name: "Odd One Out & Categories" },
+      compounds: { name: "Compound Words & Word Pairs" },
+      codes: { name: "Letter Codes" },
+      sequences: { name: "Letter & Number Sequences" },
+      wordplay: { name: "Hidden Words & Anagrams" },
+      logic: { name: "Logic & Deduction" }
     };
 
-    const ACTIVE_TOPICS = Object.keys(TOPICS).filter(t => t !== "mixed");
     const BANK = [];
     let familyCounter = 0;
-
-    const els = {
-      bankSummary: document.getElementById("bankSummary"),
-      topicGrid: document.getElementById("topicGrid"),
-      homeScreen: document.getElementById("homeScreen"),
-      quizScreen: document.getElementById("quizScreen"),
-      resultsScreen: document.getElementById("resultsScreen"),
-      homeToolbar: document.getElementById("homeToolbar"),
-      sessionLength: document.getElementById("sessionLength"),
-      resetProgressBtn: document.getElementById("resetProgressBtn"),
-      quizTitle: document.getElementById("quizTitle"),
-      scoreText: document.getElementById("scoreText"),
-      questionCountText: document.getElementById("questionCountText"),
-      levelText: document.getElementById("levelText"),
-      progressFill: document.getElementById("progressFill"),
-      tagRow: document.getElementById("tagRow"),
-      questionText: document.getElementById("questionText"),
-      stimulusWrap: document.getElementById("stimulusWrap"),
-      interactionWrap: document.getElementById("interactionWrap"),
-      hintBtn: document.getElementById("hintBtn"),
-      checkBtn: document.getElementById("checkBtn"),
-      nextBtn: document.getElementById("nextBtn"),
-      backBtn: document.getElementById("backBtn"),
-      feedbackPanel: document.getElementById("feedbackPanel"),
-      finalScore: document.getElementById("finalScore"),
-      finalMessage: document.getElementById("finalMessage"),
-      playAgainBtn: document.getElementById("playAgainBtn"),
-      homeBtn: document.getElementById("homeBtn"),
-      reviewWrap: document.getElementById("reviewWrap")
-    };
-
-    const defaultProgress = () => {
-      const topics = {};
-      ACTIVE_TOPICS.forEach(id => topics[id] = { level: 2, total: 0, correct: 0, streak: 0, bestStreak: 0 });
-      return { topics, lifetime: { total: 0, correct: 0 } };
-    };
-
-    let progress = loadProgress();
-    let state = {
-      topic: null,
-      currentQuestion: null,
-      currentEntry: null,
-      used: new Set(),
-      index: 0,
-      length: 15,
-      score: 0,
-      answered: false,
-      history: [],
-      multiSelected: new Set(),
-      orderSelected: []
-    };
-
-    function loadProgress() {
-      try {
-        const raw = localStorage.getItem("elevenPlusVRProgressV1");
-        const parsed = raw ? JSON.parse(raw) : defaultProgress();
-        const base = defaultProgress();
-        ACTIVE_TOPICS.forEach(id => parsed.topics[id] = Object.assign(base.topics[id], parsed.topics[id] || {}));
-        parsed.lifetime = Object.assign(base.lifetime, parsed.lifetime || {});
-        return parsed;
-      } catch (e) {
-        return defaultProgress();
-      }
-    }
-
-    function saveProgress() { localStorage.setItem("elevenPlusVRProgressV1", JSON.stringify(progress)); }
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
     function rint(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
     function pick(arr) { return arr[rint(0, arr.length - 1)]; }
@@ -232,11 +162,6 @@
       [-3,-2,-1,1,2,3,4,5].forEach(n => letters.push(letter(p+n)));
       return shuffle(unique(letters).slice(0, 4)).map(v => ({ value: v, label: v }));
     }
-    function topicLevel(topic) { return progress.topics[topic]?.level || 2; }
-    function averageLevel() { return Math.round(ACTIVE_TOPICS.reduce((s,t)=>s+topicLevel(t),0) / ACTIVE_TOPICS.length); }
-    function dotLevel(level) {
-      return `<span class="level-dots" aria-label="Level ${level} out of 5">${[1,2,3,4,5].map(n => `<span class="dot ${n <= level ? "on" : ""}"></span>`).join("")}</span>`;
-    }
     const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     function pos(ch) { return ALPHABET.indexOf(String(ch).toUpperCase()) + 1; }
     function letter(n) { return ALPHABET[((n - 1) % 26 + 26) % 26]; }
@@ -251,7 +176,8 @@
       for (let i = 0; i < 26; i++) {
         const x = startX + i * cell;
         const ch = ALPHABET[i];
-        html += `<rect x="${x}" y="${y}" width="22" height="28" rx="5" fill="#ffffff" stroke="#16324f" stroke-width="1.2"/>`;
+        const highlighted = hs.has(ch);
+        html += `<rect x="${x}" y="${y}" width="22" height="28" rx="5" fill="${highlighted?'#fff0b8':'#ffffff'}" stroke="${highlighted?'#9a6a00':'#16324f'}" stroke-width="${highlighted?'2.4':'1.2'}"/>`;
         html += `<text x="${x+11}" y="${y+19}" text-anchor="middle" font-family="Trebuchet MS, Arial" font-size="13" font-weight="900" fill="#17314f">${ch}</text>`;
         html += `<text x="${x+11}" y="${y+45}" text-anchor="middle" font-family="Trebuchet MS, Arial" font-size="10" font-weight="700" fill="#5a6c82">${i+1}</text>`;
       }
@@ -358,18 +284,18 @@
       ["hair", "cut"], ["wheel", "chair"], ["rain", "bow"], ["note", "book"], ["key", "board"], ["post", "card"]
     ];
     const SHARED_BEFORE = [
-      {a:"ball", b:"step", ans:"foot", opts:["hand","rain","book"], d:2}, {a:"flower", b:"light", ans:"sun", opts:["moon","star","snow"], d:2},
+      {a:"ball", b:"step", ans:"foot", opts:["hand","rain","book"], d:2}, {a:"flower", b:"light", ans:"sun", opts:["pencil","chair","river"], d:2},
       {a:"shelf", b:"case", ans:"book", opts:["door","sea","rain"], d:2}, {a:"coat", b:"bow", ans:"rain", opts:["snow","star","cup"], d:3},
-      {a:"man", b:"ball", ans:"snow", opts:["sun","foot","black"], d:3}, {a:"shell", b:"side", ans:"sea", opts:["fire","book","butter"], d:3},
-      {a:"fish", b:"light", ans:"star", opts:["sun","door","hair"], d:4}, {a:"bag", b:"shake", ans:"hand", opts:["foot","rain","moon"], d:4},
-      {a:"work", b:"place", ans:"home", opts:["school","book","wheel"], d:5}, {a:"room", b:"time", ans:"bed", opts:["book","sea","cup"], d:5}
+      {a:"man", b:"ball", ans:"snow", opts:["pencil","chair","river"], d:3}, {a:"shell", b:"side", ans:"sea", opts:["fire","book","butter"], d:3},
+      {a:"fish", b:"light", ans:"star", opts:["pencil","chair","river"], d:4}, {a:"bag", b:"shake", ans:"hand", opts:["foot","rain","moon"], d:4},
+      {a:"work", b:"town", ans:"home", opts:["school","book","wheel"], d:5}, {a:"room", b:"time", ans:"bed", opts:["book","sea","cup"], d:5}
     ];
     const SHARED_AFTER = [
       {a:"tooth", b:"paint", ans:"brush", opts:["coat","ball","case"], d:2}, {a:"rain", b:"winter", ans:"coat", opts:["cake","shell","fish"], d:2},
-      {a:"card", b:"sand", ans:"box", opts:["brush","work","light"], d:3}, {a:"moon", b:"torch", ans:"light", opts:["man","card","shell"], d:3},
+      {a:"letter", b:"sand", ans:"box", opts:["brush","work","light"], d:3}, {a:"moon", b:"torch", ans:"light", opts:["man","card","shell"], d:3},
       {a:"cup", b:"pan", ans:"cake", opts:["fly","work","ball"], d:3}, {a:"hair", b:"paper", ans:"clip", opts:["case","chair","fish"], d:4},
-      {a:"door", b:"key", ans:"hole", opts:["bow","room","fly"], d:4}, {a:"fire", b:"home", ans:"work", opts:["flower","side","board"], d:4},
-      {a:"note", b:"exercise", ans:"book", opts:["case","room","step"], d:5}, {a:"water", b:"paint", ans:"colour", opts:["chair","cake","board"], d:5}
+      {a:"button", b:"key", ans:"hole", opts:["bow","room","fly"], d:4}, {a:"fire", b:"home", ans:"work", opts:["flower","side","board"], d:4},
+      {a:"note", b:"exercise", ans:"book", opts:["case","room","step"], d:5}, {a:"water", b:"fire", ans:"proof", opts:["chair","cake","board"], d:5}
     ];
 
     function buildBank() {
@@ -649,7 +575,7 @@
         const cats = Object.keys(WORDS.categories);
         const cat = pick(cats);
         const same = shuffle(WORDS.categories[cat]).slice(0, 2);
-        const distractors = shuffle(cats.filter(c => c !== cat).flatMap(c => WORDS.categories[c])).slice(0, 3);
+        const distractors = shuffle(cats.filter(c => c !== cat)).slice(0, 3).map(c => pick(WORDS.categories[c]));
         const words = shuffle(same.concat(distractors));
         return qBase("classification", "Same group pair", d, "multi", "Choose the two words that belong to the same group.", same, {
           choices: words.map(w => ({ value: w, label: w })),
@@ -692,7 +618,7 @@
       addFamily("classification", "Letter feature classification", d => {
         const options = [
           {rule:"contain double letters", good:["letter","rabbit","coffee","summer"], odd:"paper"},
-          {rule:"start and end with the same letter", good:["level","radar","rotor","civic"], odd:"river"},
+          {rule:"start and end with the same letter", good:["level","radar","rotor","civic"], odd:"rivet"},
           {rule:"have exactly five letters", good:["apple","chair","green","table"], odd:"window"},
           {rule:"contain the letter pair sh", good:["shell","brush","fresh","shark"], odd:"chair"},
           {rule:"have letters in alphabetical order", good:["almost","begin","ghost","chips"], odd:"zebra"},
@@ -702,7 +628,7 @@
         const words = shuffle(shuffle(set.good).slice(0,3).concat(set.odd));
         return qBase("classification", "Letter feature classification", d, "mc", `Three words ${set.rule}. Which word does not?`, set.odd, {
           stimulus: wordBank(words),
-          choices: makeTextChoices(set.odd, set.good),
+          choices: shuffle(words).map(w => ({value:w,label:w})),
           hint: "Check the letters of each word carefully.",
           explanation: `${set.odd} is the word that does not ${set.rule}.`
         });
@@ -758,10 +684,20 @@
       });
 
       addFamily("compounds", "Complete the compound word", d => {
-        const [first, second] = pick(COMPOUNDS);
+        const item = pick([
+          ["sun","flower",["book","river","door"],["pencil","chair","river"]],
+          ["tooth","brush",["river","cloud","window"],["river","window","garden"]],
+          ["rain","coat",["pencil","river","cloud"],["pencil","window","carpet"]],
+          ["star","fish",["pencil","window","garden"],["pencil","window","carpet"]],
+          ["foot","ball",["pencil","window","river"],["pencil","cloud","window"]],
+          ["book","case",["pencil","river","cloud"],["river","cloud","garden"]],
+          ["snow","man",["pencil","river","cloud"],["pencil","window","carpet"]],
+          ["door","bell",["river","pencil","cloud"],["river","pencil","cloud"]]
+        ]);
+        const [first, second, beforeOptions, afterOptions] = item;
         const firstBlank = Math.random() < 0.5;
         const ans = firstBlank ? first : second;
-        const opts = shuffle(COMPOUNDS.flat()).filter(w => w !== ans && w !== (firstBlank ? second : first)).slice(0, 3);
+        const opts = firstBlank ? beforeOptions : afterOptions;
         return qBase("compounds", "Complete the compound word", d, "mc", firstBlank ? `Choose the word that goes before ${second} to make a compound word.` : `Choose the word that goes after ${first} to make a compound word.`, ans, {
           choices: makeTextChoices(ans, opts),
           hint: "Put the two parts together and check whether they make a familiar word.",
@@ -788,14 +724,14 @@
       });
 
       addFamily("compounds", "Select the compound pair", d => {
-        const pair = pick(COMPOUNDS);
+        const pair = pick([
+          ["sun","flower",["pencil","chair","river"]], ["tooth","brush",["river","window","garden"]],
+          ["rain","coat",["pencil","window","carpet"]], ["star","fish",["pencil","window","carpet"]],
+          ["foot","ball",["pencil","cloud","window"]], ["home","work",["pencil","cloud","river"]],
+          ["book","case",["river","cloud","garden"]], ["bed","room",["pencil","cloud","window"]]
+        ]);
         const ans = `${pair[0]} + ${pair[1]}`;
-        const wrong = [];
-        while (wrong.length < 4) {
-          const a = pick(COMPOUNDS)[0], b = pick(COMPOUNDS)[1];
-          const text = `${a} + ${b}`;
-          if (text !== ans && !COMPOUNDS.some(p => `${p[0]} + ${p[1]}` === text)) wrong.push(text);
-        }
+        const wrong = pair[2].map(word => `${pair[0]} + ${word}`);
         return qBase("compounds", "Select the compound pair", d, "mc", "Which pair makes a common compound word?", ans, {
           choices: makeTextChoices(ans, wrong),
           hint: "Read each pair as one word.",
@@ -804,8 +740,10 @@
       });
 
       addFamily("compounds", "Match compound halves", d => {
-        const pairsRaw = [];
-        shuffle(COMPOUNDS).forEach(p => { if (pairsRaw.length < 4 && !pairsRaw.some(x => tidy(x[0]) === tidy(p[0]))) pairsRaw.push(p); });
+        const pairsRaw = shuffle(pick([
+          [["rain","coat"],["sun","flower"],["book","mark"],["door","bell"]],
+          [["tooth","brush"],["star","fish"],["foot","ball"],["bed","room"]]
+        ]));
         const pairs = pairsRaw.map(p => ({ left: p[0], right: p[1] }));
         return qBase("compounds", "Match compound halves", d, "match", "Match each first half to a second half to make compound words.", Object.fromEntries(pairs.map(p => [p.left, p.right])), {
           pairs,
@@ -1086,7 +1024,7 @@
       addFamily("sequences", "Order letters alphabetically", d => {
         const letters = shuffle(ALPHABET.split("")).slice(0, Math.min(5, 3 + Math.floor(d/2)));
         const ans = letters.slice().sort((a,b)=>pos(a)-pos(b));
-        return qBase("sequences", "Order letters alphabetically", d, "order", "Click the letters in alphabetical order.", ans, {
+        return qBase("sequences", "Order letters alphabetically", d, "order", "Select the letters in alphabetical order.", ans, {
           tiles: shuffle(ans),
           stimulus: wordBank(letters),
           hint: "Use A, B, C order.",
@@ -1124,7 +1062,7 @@
       addFamily("wordplay", "Order an anagram", d => {
         const [word] = pick(WORDS.anagrams.filter(x => x[0].length <= 5 + Math.floor(d/2)));
         const letters = shuffle(word.toUpperCase().split(""));
-        return qBase("wordplay", "Order an anagram", d, "order", `Click the letters in the order that makes the word ${word}.`, word.toUpperCase().split(""), {
+        return qBase("wordplay", "Order an anagram", d, "order", `Select the letters in the order that makes the word ${word}.`, word.toUpperCase().split(""), {
           tiles: letters,
           stimulus: wordBank(letters),
           hint: "Use each letter once to spell the target word.",
@@ -1649,10 +1587,10 @@
       addFamily("classification", "Letter feature groups", d => {
         const sets = [
           { rule: "have double letters", correct: ["rabbit", "letter", "coffee"], odd: "tiger" },
-          { rule: "begin and end with the same letter", correct: ["level", "radar", "rotor"], odd: "river" },
+          { rule: "begin and end with the same letter", correct: ["level", "radar", "rotor"], odd: "rivet" },
           { rule: "contain exactly one vowel", correct: ["grin", "plant", "frost"], odd: "piano" },
           { rule: "are in alphabetical order inside the word", correct: ["almost", "ghost", "begin"], odd: "zebra" },
-          { rule: "contain the smaller word 'ear'", correct: ["learn", "earth", "pearl"], odd: "early" }
+          { rule: "contain the smaller word 'ear'", correct: ["learn", "earth", "pearl"], odd: "eager" }
         ];
         const set = pick(sets.slice(0, 1 + d));
         const words = shuffle(set.correct.concat(set.odd));
@@ -1668,7 +1606,7 @@
         const sets = [
           { small: "ant", correct: ["plant", "giant"], distractors: ["uncle", "river", "pencil"] },
           { small: "ear", correct: ["earth", "learn"], distractors: ["stone", "wrist", "cloud"] },
-          { small: "owl", correct: ["bowling", "towel"], distractors: ["honest", "apple", "paper"] },
+          { small: "owl", correct: ["bowling", "fowl"], distractors: ["honest", "apple", "paper"] },
           { small: "hen", correct: ["when", "kitchen"], distractors: ["garden", "window", "school"] },
           { small: "ink", correct: ["think", "blink"], distractors: ["paint", "write", "paper"] }
         ].slice(0, 2 + d);
@@ -1703,10 +1641,10 @@
 
       addFamily("compounds", "Shared first word compounds", d => {
         const items = [
-          ["sun", "flower", "light", ["moon", "rain", "tree"], 1], ["tooth", "brush", "paste", ["chair", "table", "clock"], 1],
+          ["sun", "flower", "light", ["pencil", "chair", "river"], 1], ["tooth", "brush", "paste", ["chair", "table", "clock"], 1],
           ["book", "case", "mark", ["river", "garden", "shoe"], 2], ["rain", "bow", "coat", ["snow", "storm", "cloud"], 2],
           ["foot", "ball", "path", ["hand", "head", "road"], 3], ["sea", "side", "weed", ["sand", "wave", "rock"], 4],
-          ["star", "fish", "light", ["space", "planet", "moon"], 5]
+          ["star", "fish", "light", ["space", "planet", "pencil"], 5]
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("compounds", "Shared first word compounds", d, "mc", `Which word can go before both ${item[1]} and ${item[2]} to make compound words?`, item[0], {
@@ -1718,7 +1656,7 @@
 
       addFamily("compounds", "Shared final word compounds", d => {
         const items = [
-          ["cake", "pan", "fish", ["book", "chair", "door"], 1], ["man", "fire", "police", ["paper", "glass", "river"], 1],
+          ["cake", "pan", "fish", ["book", "chair", "door"], 1], ["side", "sea", "road", ["paper", "glass", "river"], 1],
           ["light", "sun", "moon", ["stone", "water", "foot"], 2], ["house", "green", "tree", ["paint", "road", "cup"], 2],
           ["line", "coast", "goal", ["star", "cloud", "field"], 3], ["work", "home", "class", ["paper", "bag", "box"], 4],
           ["keeper", "goal", "shop", ["field", "road", "sea"], 5]
@@ -1732,16 +1670,16 @@
       }, 10);
 
       addFamily("compounds", "Select the compound pair", d => {
-        const pairs = [
-          ["butter", "fly"], ["cup", "board"], ["rain", "bow"], ["dragon", "fly"], ["snow", "man"], ["note", "book"], ["door", "bell"], ["back", "pack"], ["class", "room"], ["water", "fall"]
+        const items = [
+          ["butter","fly",["room","window","garden"]], ["cup","board",["river","window","garden"]],
+          ["rain","bow",["sock","desk","pencil"]], ["dragon","fly",["pencil","window","carpet"]],
+          ["snow","man",["pencil","window","carpet"]], ["note","book",["river","carpet","garden"]],
+          ["door","bell",["river","pencil","cloud"]], ["back","pack",["river","cloud","pencil"]],
+          ["class","room",["river","cloud","pencil"]], ["water","fall",["pencil","carpet","window"]]
         ];
-        const pair = pick(pairs.slice(0, 4 + d));
+        const pair = pick(items.slice(0, 4 + d));
         const ans = `${pair[0]} + ${pair[1]}`;
-        const wrong = [];
-        while (wrong.length < 5) {
-          const a = pick(pairs)[0], b = pick(pairs)[1], txt = `${a} + ${b}`;
-          if (txt !== ans && !wrong.includes(txt)) wrong.push(txt);
-        }
+        const wrong = pair[2].map(word => `${pair[0]} + ${word}`);
         return qBase("compounds", "Select the compound pair", d, "mc", "Which pair makes a common compound word?", ans, {
           choices: makeTextChoices(ans, wrong),
           hint: "Join the two words and check whether the result is a familiar word.",
@@ -1765,7 +1703,7 @@
 
       addFamily("compounds", "Word-chain compounds", d => {
         const chains = [
-          ["rain", "bow", "tie"], ["sun", "flower", "pot"], ["book", "case", "load"], ["door", "bell", "ring"], ["fire", "fly", "paper"], ["sea", "shell", "fish"]
+          ["rain", "bow", "tie"], ["sun", "flower", "pot"], ["book", "case", "load"], ["fire", "fly", "paper"], ["sea", "shell", "fish"]
         ].slice(0, 2 + d);
         const chain = pick(chains);
         const ans = chain[1];
@@ -1987,12 +1925,12 @@
 
       addFamily("wordplay", "Hidden word sentences", d => {
         const items = [
-          ["The starling landed near the old wall.", "star", ["ring", "land", "near"], 1],
-          ["We found a pearl in the box.", "ear", ["pea", "line", "fox"], 1],
-          ["The lantern glowed softly.", "ant", ["tern", "owl", "soft"], 2],
-          ["The captain kept the map safe.", "ink", ["cap", "hen", "tree"], 3],
-          ["A clear thaw followed the snow.", "ear", ["owl", "low", "hat"], 4],
-          ["The child ran through the garden.", "ran", ["ring", "hut", "den"], 5]
+          ["The starling landed near the old wall.", "star", ["pear", "lion", "sand"], 1],
+          ["We found a pearl in the box.", "ear", ["lion", "sand", "mile"], 1],
+          ["The lantern glowed softly.", "ant", ["pear", "lion", "sand"], 2],
+          ["The captain kept the map safe.", "ink", ["pear", "lion", "sand"], 3],
+          ["A clear thaw followed the snow.", "ear", ["lion", "sand", "mile"], 4],
+          ["The child ran through the garden.", "ran", ["pear", "lion", "mile"], 5]
         ].filter(x => x[3] <= d + 1);
         const item = pick(items);
         return qBase("wordplay", "Hidden word sentences", d, "mc", `Which answer is hidden as consecutive letters in the sentence? ${item[0]}`, item[1], {
@@ -2075,7 +2013,7 @@
         const items = [
           ["All blicks are green. This object is a blick.", "It must be green.", ["It cannot be green.", "It must be red.", "It is not a blick."], 1],
           ["No lamps are animals. A cat is an animal.", "A cat is not a lamp.", ["A cat is a lamp.", "All animals are lamps.", "No cats are animals."], 2],
-          ["All medals are round. Some round things are coins.", "Some round things may be medals.", ["All coins are medals.", "No medals are coins.", "All round things are medals."], 3],
+          ["All medals are round. Some medals are gold.", "Some gold things are round.", ["All round things are gold.", "No gold things are round.", "All medals are gold."], 3],
           ["Every glip is a plon. No plons are red.", "No glips are red.", ["All red things are glips.", "Some glips are red.", "No glips are plons."], 4],
           ["Some nabs are wibs. All wibs are silver.", "Some nabs are silver.", ["All nabs are silver.", "No nabs are wibs.", "All silver things are nabs."], 5]
         ].filter(x => x[3] <= d + 1);
@@ -2301,7 +2239,7 @@
           ["The athlete tried to ___ the record.", "break", ["brake", "brick", "brook"], 4],
           ["The knight rode through the castle ___.", "gate", ["gait", "great", "grate"], 4],
           ["The explorer followed the map's ___.", "route", ["root", "rout", "wrote"], 5],
-          ["The pupils waited for the ___ to speak.", "principal", ["principle", "printable", "prince"], 5]
+          ["The college ___ spoke at the assembly.", "principal", ["principle", "printable", "prince"], 5]
         ].filter(x => x[3] <= d + 1);
         const item = pick(items);
         return qBase("vocab", "Additional confused words", d, "mc", "Choose the correct word to complete the sentence.", item[1], {
@@ -2467,7 +2405,7 @@
 
       addFamily("classification", "Additional letter feature odd one out", d => {
         const items = [
-          [["MOM", "DAD", "EVE"], "BOY", "palindromes", 1], [["BEE", "SEE", "TREE"], "BIRD", "double E sound/spelling", 2],
+          [["MUM", "DAD", "EVE"], "BOY", "palindromes", 1], [["BEE", "SEE", "TREE"], "BIRD", "double E sound/spelling", 2],
           [["STOP", "SPOT", "POST"], "PAST", "same letters", 2], [["CART", "TRAC", "ACTR"], "CARE", "same four letters", 3],
           [["LEVEL", "RADAR", "REFER"], "RIVER", "palindromes", 4], [["SILENT", "LISTEN", "ENLIST"], "TINGLE", "anagrams", 4],
           [["ABBA", "DEED", "NOON"], "MOON", "palindromes", 5]
@@ -2518,9 +2456,9 @@
 
       addFamily("compounds", "Additional compound completion", d => {
         const items = [
-          ["rain", "bow", ["coat", "drop", "cloud"], 1], ["tooth", "paste", ["brush", "ache", "fairy"], 1], ["door", "bell", ["way", "mat", "step"], 2],
-          ["star", "fish", ["light", "ship", "dust"], 2], ["note", "book", ["pad", "paper", "case"], 3], ["wheel", "chair", ["barrow", "house", "room"], 3],
-          ["dragon", "fly", ["fruit", "boat", "wing"], 4], ["butter", "fly", ["cup", "milk", "dish"], 4], ["key", "board", ["hole", "ring", "stone"], 5]
+          ["rain", "bow", ["sock", "desk", "pencil"], 1], ["tooth", "paste", ["river", "window", "garden"], 1], ["door", "bell", ["river", "pencil", "cloud"], 2],
+          ["star", "fish", ["pencil", "window", "carpet"], 2], ["note", "book", ["river", "carpet", "garden"], 3], ["wheel", "chair", ["pencil", "cloud", "garden"], 3],
+          ["dragon", "fly", ["pencil", "window", "carpet"], 4], ["butter", "fly", ["river", "pencil", "window"], 4], ["key", "board", ["cloud", "river", "carpet"], 5]
         ].filter(x => x[3] <= d + 1);
         const item = pick(items);
         return qBase("compounds", "Additional compound completion", d, "mc", `Which word can join ${item[0]} to make a compound word?`, item[1], {
@@ -2532,10 +2470,10 @@
 
       addFamily("compounds", "Additional shared first word", d => {
         const items = [
-          ["sun", "flower", "shine", ["moon", "star", "rain"], 1], ["foot", "ball", "path", ["hand", "door", "book"], 1],
+          ["sun", "flower", "shine", ["pencil", "chair", "river"], 1], ["foot", "ball", "path", ["hand", "door", "book"], 1],
           ["book", "case", "mark", ["note", "paper", "door"], 2], ["rain", "coat", "drop", ["snow", "wind", "star"], 2],
           ["sea", "shell", "side", ["river", "sand", "sun"], 3], ["fire", "work", "place", ["home", "water", "stone"], 3],
-          ["hand", "shake", "writing", ["foot", "head", "paper"], 4], ["moon", "light", "stone", ["sun", "star", "cloud"], 5]
+          ["hand", "shake", "writing", ["foot", "head", "paper"], 4], ["moon", "light", "stone", ["pencil", "chair", "river"], 5]
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("compounds", "Additional shared first word", d, "mc", `Which word can go before both ${item[1]} and ${item[2]} to make compound words?`, item[0], {
@@ -2613,7 +2551,7 @@
       }, 10);
 
       addFamily("codes", "Additional alphabet value sums", d => {
-        const words = ["ACE", "BAD", "BED", "CAB", "FACE", "CAFE", "BAG", "HAT", "MATH", "CODE"].slice(0, 4 + d);
+        const words = ["ACE", "BAD", "BED", "CAB", "FACE", "CAFE", "BAG", "HAT", "MATHS", "CODE"].slice(0, 4 + d);
         const word = pick(words);
         const ans = alphaSum(word);
         return qBase("codes", "Additional alphabet value sums", d, "mc", `If A = 1, B = 2, C = 3 and so on, what is the value of ${word}?`, ans, {
@@ -2819,8 +2757,8 @@
 
       addFamily("wordplay", "Additional remove one letter", d => {
         const items = [
-          ["PLANE", "PLAN", "E", 1], ["STONE", "TONE", "S", 1], ["CART", "CAT", "R", 2], ["BRIDE", "BIRD", "E", 3],
-          ["SPARE", "SPEAR", "R", 3], ["TRAIN", "RAIN", "T", 4], ["CRANE", "CANE", "R", 4], ["GLOBE", "LOBE", "G", 5]
+          ["PLANE", "PLAN", "E", 1], ["STONE", "TONE", "S", 1], ["CART", "CAT", "R", 2], ["BREAD", "BEAD", "R", 3],
+          ["SPARE", "PARE", "S", 3], ["TRAIN", "RAIN", "T", 4], ["CRANE", "CANE", "R", 4], ["GLOBE", "LOBE", "G", 5]
         ].filter(x => x[3] <= d + 1);
         const item = pick(items);
         return qBase("wordplay", "Additional remove one letter", d, "mc", `Remove one letter from ${item[0]} to make ${item[1]}. Which letter is removed?`, item[2], {
@@ -3208,10 +3146,10 @@
 
       addFamily("classification", "Final letter feature groups", d => {
         const patterns = [
-          ["start and end with the same letter", ["level", "radar", "civic", "refer"], ["river", "pencil"], 2],
+          ["start and end with the same letter", ["level", "radar", "civic", "refer"], ["rivet", "pencil"], 2],
           ["contain a double letter", ["letter", "rabbit", "summer", "coffee"], ["garden", "planet"], 2],
           ["have five letters", ["table", "chair", "plant", "cloud"], ["window", "tree"], 3],
-          ["contain exactly two vowels", ["pencil", "basket", "window", "market"], ["audio", "tree"], 4],
+          ["contain exactly two vowels", ["pencil", "basket", "window", "market"], ["audio", "rhythm"], 4],
           ["letters are in alphabetical order", ["almost", "ghost", "begin", "chintz"], ["zebra", "cabin"], 5]
         ].filter(x => x[3] <= d + 1);
         const item = pick(patterns);
@@ -3561,7 +3499,7 @@
       }, 10);
 
       addFamily("wordplay", "Final remove one letter", d => {
-        const items = [["plane", "plan"], ["stone", "tone"], ["grape", "gape"], ["brave", "bare"], ["castle", "caste"], ["stream", "steam"], ["planet", "plant"]].slice(0, 4 + d);
+        const items = [["plane", "plan"], ["stone", "tone"], ["grape", "gape"], ["brave", "rave"], ["castle", "caste"], ["stream", "steam"], ["planet", "plant"]].slice(0, 4 + d);
         const [start, answer] = pick(items);
         return qBase("wordplay", "Final remove one letter", d, "mc", `Remove one letter from ${start.toUpperCase()} to make a new word. Which word can be made?`, answer, {
           choices: mk(answer, shuffle(items.map(p => p[1]).filter(v => v !== answer)).slice(0, 5)),
@@ -3676,14 +3614,14 @@
       const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
       const categorySets = {
         animals:["badger","otter","rabbit","fox","swan","deer","hedgehog","horse","eagle","seal"],
-        tools:["hammer","saw","drill","spanner","chisel","pliers","rake","trowel","wrench","plane"],
-        fruit:["apple","banana","pear","plum","grape","orange","mango","peach","melon","kiwi"],
+        tools:["hammer","saw","drill","spanner","chisel","pliers","rake","trowel","mallet","screwdriver"],
+        fruit:["apple","banana","pear","grape","mango","melon","papaya","guava","lychee","pineapple"],
         clothing:["jumper","scarf","glove","coat","shirt","sock","jacket","hat","belt","vest"],
         buildings:["library","station","church","museum","castle","cinema","school","theatre","hospital","gallery"],
         emotions:["joyful","anxious","proud","gloomy","calm","nervous","angry","excited","curious","content"],
         transport:["train","bicycle","car","coach","tram","ferry","lorry","scooter","submarine","helicopter"],
         materials:["cotton","wool","metal","glass","plastic","wood","stone","paper","rubber","silk"],
-        colours:["red","blue","green","yellow","purple","orange","black","white","silver","gold"],
+        colours:["red","blue","green","yellow","purple","turquoise","black","white","crimson","indigo"],
         weather:["rain","snow","hail","fog","wind","sunshine","thunder","drizzle","frost","mist"]
       };
       const definitions = [
@@ -3714,10 +3652,33 @@
       const compounds = [
         ["sun","flower"],["tooth","brush"],["rain","coat"],["star","fish"],["foot","ball"],["home","work"],["book","case"],["snow","man"],["bed","room"],["door","way"],["dragon","fly"],["butter","fly"],["sea","shell"],["moon","light"],["black","bird"],["cup","cake"],["fire","work"],["pan","cake"],["hair","cut"],["wheel","chair"],["note","book"],["key","board"],["post","card"],["hand","bag"]
       ];
+      const compoundChoiceRows = [
+        ["sun","flower",["pencil","chair","window","river"],["case","brush","coat","card"]],
+        ["tooth","brush",["river","moon","book","chair"],["coat","case","room","board"]],
+        ["rain","coat",["book","moon","cup","star"],["case","brush","room","chair"]],
+        ["star","fish",["book","chair","pencil","garden"],["coat","brush","case","room"]],
+        ["foot","ball",["book","rain","tooth","sea"],["case","brush","coat","card"]],
+        ["home","work",["tooth","rain","cup","moon"],["brush","coat","fish","cut"]],
+        ["book","case",["rain","tooth","moon","bed"],["coat","brush","chair","ball"]],
+        ["snow","man",["pencil","window","garden","river"],["case","brush","chair","book"]],
+        ["bed","room",["rain","tooth","pencil","cloud"],["coat","brush","ball","card"]],
+        ["door","way",["pencil","tooth","moon","cup"],["brush","coat","fish","book"]],
+        ["dragon","fly",["pencil","window","garden","river"],["coat","brush","case","room"]],
+        ["butter","fly",["pencil","window","garden","river"],["coat","brush","case","room"]],
+        ["sea","shell",["pencil","window","garden","chair"],["brush","coat","case","card"]],
+        ["moon","light",["pencil","carpet","river","chair"],["brush","coat","case","chair"]],
+        ["black","bird",["pencil","window","garden","carpet"],["coat","brush","case","room"]],
+        ["cup","cake",["river","window","chair","tooth"],["coat","brush","fish","room"]],
+        ["fire","work",["tooth","rain","cup","moon"],["coat","brush","case","room"]],
+        ["pan","cake",["river","window","chair","tooth"],["coat","brush","case","room"]],
+        ["hair","cut",["pencil","window","garden","river"],["coat","case","fish","room"]],
+        ["wheel","chair",["pencil","river","garden","tooth"],["coat","brush","case","room"]]
+      ];
+      const compoundFirstChoiceRows = compoundChoiceRows.filter((row, index, rows) => rows.findIndex(other => other[1] === row[1]) === index);
       const hiddenPhrases = [
-        ["The calm otter swam across.","mott"], ["A brave ram bleated loudly.","ram"], ["The garden gate rattled.","den"],
-        ["A silver fish hid under reeds.","fish"], ["The small ion battery was new.","lion"], ["Her sharp answer surprised us.","pan"],
-        ["We saw a raven near the roof.","raven"], ["The old carpet had faded.","car"], ["A clean eagle feather fell.","eagle"], ["The boat travelled by moonlight.","moon"]
+        ["A starling landed on the wall.","star"], ["The pearl shone in the box.","ear"], ["A lantern glowed in the hall.","ant"],
+        ["The captain kept the map safe.","ink"], ["Please stop early if it rains.","pear"], ["That is the pencil I once used.","lion"],
+        ["The glass and plate were clean.","sand"], ["Be sure advice is checked carefully.","read"], ["I stayed calm; I left quietly.","mile"], ["The train stopped at noon.","rain"]
       ];
 
       addFamily("vocab", "Exam synonym precision", d => {
@@ -3981,9 +3942,9 @@
       }, 10);
 
       addFamily("compounds", "Compound first half", d => {
-        const item = pick(compounds.slice(0, 10 + d * 2));
+        const item = pick(compoundFirstChoiceRows.slice(0, 10 + d * 2));
         const answer = item[0];
-        const distractors = shuffle(compounds.map(c => c[0]).filter(w => w !== answer)).slice(0, 4);
+        const distractors = item[2];
         return qBase("compounds", "Compound first half", d, "mc", `Which word can go before ${item[1]} to make a compound word?`, answer, {
           choices: makeTextChoices(answer, distractors),
           hint: "Put each option before the given word and listen for a real compound word.",
@@ -3992,9 +3953,9 @@
       }, 10);
 
       addFamily("compounds", "Compound second half", d => {
-        const item = pick(compounds.slice(0, 10 + d * 2));
+        const item = pick(compoundChoiceRows.slice(0, 10 + d * 2));
         const answer = item[1];
-        const distractors = shuffle(compounds.map(c => c[1]).filter(w => w !== answer)).slice(0, 4);
+        const distractors = item[3];
         return qBase("compounds", "Compound second half", d, "mc", `Which word can go after ${item[0]} to make a compound word?`, answer, {
           choices: makeTextChoices(answer, distractors),
           hint: "Put each option after the given word and check for a real compound word.",
@@ -4043,7 +4004,13 @@
       }, 10);
 
       addFamily("compounds", "Match compound halves", d => {
-        const pairs = shuffle(compounds.slice(0, 12 + d * 2)).slice(0, 4).map(p => ({left:p[0], right:p[1]}));
+        const matchSets = [
+          [["book","case"],["tooth","brush"],["rain","coat"],["bed","room"]],
+          [["home","work"],["tooth","brush"],["post","card"],["sea","shell"]],
+          [["foot","path"],["hair","cut"],["note","book"],["wheel","chair"]],
+          [["sun","rise"],["school","bag"],["snow","flake"],["tooth","paste"]]
+        ];
+        const pairs = shuffle(pick(matchSets)).map(p => ({left:p[0], right:p[1]}));
         const answer = {}; pairs.forEach(p => answer[p.left] = p.right);
         return qBase("compounds", "Match compound halves", d, "match", `Match the first halves to make compound words.`, answer, {
           pairs,
@@ -4342,11 +4309,12 @@
       }, 10);
 
       addFamily("logic", "Instruction order", d => {
-        const tiles = ["double it","add 3","subtract 1","halve it"];
+        const tiles = ["double it","add 3","subtract 1"];
         const start = rint(4, 10);
-        const order = shuffle(tiles).slice(0,3);
-        let value = start;
-        order.forEach(step => { if(step==="double it") value*=2; if(step==="add 3") value+=3; if(step==="subtract 1") value-=1; if(step==="halve it") value/=2; });
+        const orders = [[tiles[0],tiles[1],tiles[2]],[tiles[0],tiles[2],tiles[1]],[tiles[1],tiles[0],tiles[2]],[tiles[1],tiles[2],tiles[0]],[tiles[2],tiles[0],tiles[1]],[tiles[2],tiles[1],tiles[0]]];
+        const scored = orders.map(order => { let value=start; order.forEach(step => { if(step==="double it")value*=2; if(step==="add 3")value+=3; if(step==="subtract 1")value-=1; }); return {order,value}; });
+        const uniqueResults = scored.filter(item => scored.filter(other => other.value===item.value).length===1);
+        const {order,value} = pick(uniqueResults);
         return qBase("logic", "Instruction order", d, "order", `Put the instructions in the order that changes ${start} into ${fmtAnswer(value)}.`, order, {
           tiles: shuffle(order),
           hint: "Test the operations one at a time until the final result is reached.",
@@ -4381,31 +4349,31 @@
         ["seed","plant","egg","bird",["nest","shell","leaf","water"],"starting form to living thing"],
         ["finger","hand","toe","foot",["shoe","arm","leg","thumb"],"part to whole"],
         ["page","book","room","house",["door","street","floor","garden"],"part to whole"],
-        ["chef","kitchen","teacher","classroom",["lesson","pupil","school","desk"],"person to usual workplace"],
-        ["doctor","hospital","pilot","cockpit",["airport","plane","uniform","captain"],"person to usual workplace"],
+        ["chef","kitchen","teacher","classroom",["lesson","pupil","book","desk"],"person to usual workplace"],
+        ["doctor","hospital","pilot","cockpit",["ticket","uniform","captain","journey"],"person to usual workplace"],
         ["pen","write","knife","cut",["sharp","fork","slice","paper"],"object to action"],
         ["thermometer","temperature","clock","time",["hour","watch","minute","calendar"],"instrument to what it measures"],
-        ["author","book","composer","music",["piano","stage","artist","song"],"creator to creation"],
-        ["lion","pride","fish","shoal",["school","water","scale","fin"],"animal to group name"]
+        ["author","book","composer","music",["piano","stage","artist","audience"],"creator to creation"],
+        ["lion","pride","fish","shoal",["river","water","scale","fin"],"animal to group name"]
       ];
       const HIDDEN = [
-        ["The calm antelope moved slowly.","ant"], ["We found a bold eagle feather.","eagle"], ["The magic art lesson began.","cart"],
-        ["A clean owl flew past the barn.","owl"], ["The bright raven watched us.","raven"], ["The warm ash tree shaded the path.","mash"],
-        ["The silver fox trotted away.","fox"], ["Mina read the map carefully.","map"], ["A sharp enigma puzzled the class.","pen"],
-        ["The garden arch excited everyone.","arch"]
+        ["A starling landed on the wall.","star"], ["The pearl shone in the box.","ear"], ["A lantern glowed in the hall.","ant"],
+        ["The captain kept every chart safe.","ink"], ["Please stop early if it rains.","pear"], ["The school I once attended has closed.","lion"],
+        ["The glass and plate were clean.","sand"], ["Be sure advice is checked carefully.","read"], ["I stayed calm; I left quietly.","mile"],
+        ["The train stopped at noon.","rain"]
       ];
       const ANAG = [
-        ["LISTEN","SILENT",["ENLIST","TINSEL","STONE","INLETS"]], ["GARDEN","DANGER",["RANGED","GRANDE","DRAGON","ORANGE"]],
-        ["BELOW","ELBOW",["BOWEL","BLOWN","BOWED","BOWER"]], ["HEART","EARTH",["HATER","RATHE","HEARD","HARDY"]],
-        ["TRACE","REACT",["CRATE","CATER","CARET","TRACK"]], ["SPARE","PEARS",["SPEAR","PARES","PRASE","SPEAK"]],
-        ["LATER","ALTER",["ALERT","RATEL","LAYER","TALLER"]], ["THING","NIGHT",["THINK","LIGHT","RIGHT","TIGHT"]],
-        ["RESCUE","SECURE",["RECUSE","CURSE","REUSE","SAUCER"]], ["LEAST","STALE",["STEAL","SLATE","TALES","STARE"]]
+        ["LISTEN","SILENT",["LITTLE","WINTER","SIMPLE","BRIGHT"]], ["GARDEN","DANGER",["DRAGON","ORANGE","BRIDGE","GATHER"]],
+        ["BELOW","ELBOW",["BLOWN","BOWED","BOWER","LOWER"]], ["HEART","EARTH",["HEARD","HARDY","HOUSE","WATER"]],
+        ["TRACE","REACT",["TRACK","TRAIL","GRACE","SPACE"]], ["SPARE","PEARS",["SPEAK","SHARE","SPACE","SCARE"]],
+        ["LATER","ALTER",["LAYER","TALLER","LASER","LIVER"]], ["THING","NIGHT",["THINK","LIGHT","RIGHT","TIGHT"]],
+        ["RESCUE","SECURE",["SAUCER","SOURCE","RESULT","RESIST"]], ["LEAST","STALE",["STARE","STEAM","LEARN","TEACH"]]
       ];
       const COMMON_BEFORE = [
         ["snow","man","ball",["rain","sun","ice","wind"],"snowman and snowball"], ["book","case","mark",["page","paper","pen","story"],"bookcase and bookmark"],
         ["sea","shell","side",["sand","water","sun","star"],"seashell and seaside"], ["rain","bow","coat",["storm","wind","snow","water"],"rainbow and raincoat"],
-        ["foot","ball","step",["hand","shoe","leg","toe"],"football and footstep"], ["sun","light","flower",["moon","star","day","sky"],"sunlight and sunflower"],
-        ["door","bell","step",["house","room","key","gate"],"doorbell and doorstep"], ["star","fish","light",["moon","sky","night","shell"],"starfish and starlight"],
+        ["foot","ball","step",["hand","shoe","leg","toe"],"football and footstep"], ["sun","light","flower",["rain","snow","door"],"sunlight and sunflower"],
+        ["door","bell","step",["house","room","key","gate"],"doorbell and doorstep"], ["star","fish","light",["door","rain","book"],"starfish and starlight"],
         ["hand","shake","bag",["arm","finger","glove","hold"],"handshake and handbag"], ["bed","room","time",["sleep","night","dream","lamp"],"bedroom and bedtime"]
       ];
       const COMMON_AFTER = [
@@ -4419,7 +4387,7 @@
         ["tooth","paint","brush",["paste","coat","case","board"],"toothbrush and paintbrush"], ["moon","torch","light",["shine","lamp","beam","glow"],"moonlight and torchlight"],
         ["hair","paper","clip",["pin","cut","brush","case"],"hairclip and paperclip"], ["note","exercise","book",["page","case","paper","work"],"notebook and exercise book"],
         ["cup","pan","cake",["board","tea","saucer","spoon"],"cupcake and pancake"], ["key","skate","board",["pad","hole","room","case"],"keyboard and skateboard"],
-        ["black","white","board",["book","sheet","room","place"],"blackboard and whiteboard"], ["rain","wind","fall",["coat","storm","drop","mill"],"rainfall and windfall"],
+        ["black","white","board",["bird","smith","berry","mail"],"blackboard and whiteboard"], ["rain","wind","fall",["coat","bow","drop","mill"],"rainfall and windfall"],
         ["door","mouse","mat",["bell","trap","step","case"],"doormat and mousemat"], ["sun","spot","light",["shine","flower","beam","day"],"sunlight and spotlight"]
       ];
 
@@ -4616,7 +4584,7 @@
       addFamily("wordplay", "Verified alphabetical order", d => {
         const words = shuffle(["amber","apple","artist","baker","basket","castle","candle","danger","garden","gentle","silver","silent"]).slice(0, 5);
         const ans = words.slice().sort((a,b)=>a.localeCompare(b));
-        return qBase("wordplay", "Verified alphabetical order", d, "order", "Click the words in dictionary order.", ans, {
+        return qBase("wordplay", "Verified alphabetical order", d, "order", "Select the words in dictionary order.", ans, {
           tiles: shuffle(ans), hint: "Compare the first letter, then the second letter when needed.", explanation: `Dictionary order is ${ans.join(', ')}.`
         });
       }, 10);
@@ -4696,7 +4664,13 @@
     function sanitiseVerbalReasoningBankForCleanExam() {
       const blockedTitles = new Set([
         "Following alphabet instructions", "Direction instructions", "Final instruction following",
-        "Final matching table", "Final select true statements"
+        "Final matching table", "Final select true statements", "Grid direction instructions",
+        "Additional grid route instructions", "Instruction order", "Number pattern with letters",
+        "Additional word length sequences", "Cause and effect analogies", "Word pair selection",
+        "Word-pair relationships", "Material and product", "Odd compound out",
+        "Hidden word across words", "Add one letter", "Odd one out by word type",
+        "Word class recognition", "Final grammatical odd one out", "Order an anagram",
+        "Order the clues"
       ]);
       const kept = BANK.filter(entry => !blockedTitles.has(entry.title));
       BANK.splice(0, BANK.length, ...kept);
@@ -4724,48 +4698,71 @@
     ];
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const examEls = {
-      startScreen:document.getElementById('startScreen'), examScreen:document.getElementById('examScreen'), resultsScreen:document.getElementById('resultsScreen'), bankCount:document.getElementById('bankCount'), startBtn:document.getElementById('startBtn'), sampleBtn:document.getElementById('sampleBtn'), examTitle:document.getElementById('examTitle'), progressText:document.getElementById('progressText'), answeredText:document.getElementById('answeredText'), timer:document.getElementById('timer'), progressFill:document.getElementById('progressFill'), questionNav:document.getElementById('questionNav'), questionNumber:document.getElementById('questionNumber'), tagRow:document.getElementById('tagRow'), stimulusBox:document.getElementById('stimulusBox'), questionText:document.getElementById('questionText'), answerArea:document.getElementById('answerArea'), reviewFeedback:document.getElementById('reviewFeedback'), prevBtn:document.getElementById('prevBtn'), flagBtn:document.getElementById('flagBtn'), nextBtn:document.getElementById('nextBtn'), finishBtn:document.getElementById('finishBtn'), sideSummary:document.getElementById('sideSummary'), miniReview:document.getElementById('miniReview'), scoreDisplay:document.getElementById('scoreDisplay'), percentDisplay:document.getElementById('percentDisplay'), heatMap:document.getElementById('heatMap'), overallFeedback:document.getElementById('overallFeedback'), resultsReviewList:document.getElementById('resultsReviewList'), downloadPdfBtn:document.getElementById('downloadPdfBtn'), reviewBtn:document.getElementById('reviewBtn'), retakeBtn:document.getElementById('retakeBtn'), printResults:document.getElementById('printResults')
+      startScreen:document.getElementById('startScreen'), examScreen:document.getElementById('examScreen'), resultsScreen:document.getElementById('resultsScreen'), startBtn:document.getElementById('startBtn'), sampleBtn:document.getElementById('sampleBtn'), examTitle:document.getElementById('examTitle'), progressText:document.getElementById('progressText'), answeredText:document.getElementById('answeredText'), timer:document.getElementById('timer'), meter:document.querySelector('.meter'), progressFill:document.getElementById('progressFill'), questionNav:document.getElementById('questionNav'), questionPanel:document.getElementById('questionPanel'), questionNumber:document.getElementById('questionNumber'), tagRow:document.getElementById('tagRow'), stimulusBox:document.getElementById('stimulusBox'), questionText:document.getElementById('questionText'), answerArea:document.getElementById('answerArea'), reviewFeedback:document.getElementById('reviewFeedback'), prevBtn:document.getElementById('prevBtn'), flagBtn:document.getElementById('flagBtn'), nextBtn:document.getElementById('nextBtn'), finishBtn:document.getElementById('finishBtn'), sideSummary:document.getElementById('sideSummary'), miniReview:document.getElementById('miniReview'), scoreDisplay:document.getElementById('scoreDisplay'), percentDisplay:document.getElementById('percentDisplay'), heatMap:document.getElementById('heatMap'), overallFeedback:document.getElementById('overallFeedback'), resultsReviewList:document.getElementById('resultsReviewList'), downloadPdfBtn:document.getElementById('downloadPdfBtn'), reviewBtn:document.getElementById('reviewBtn'), retakeBtn:document.getElementById('retakeBtn'), printResults:document.getElementById('printResults')
     };
     const exam = {questions:[], answers:{}, flagged:new Set(), index:0, results:[], score:0, finished:false, review:false, timerId:null, endsAt:0, totalSeconds:0};
     function sectionFor(topic){return EXAM_SPEC.find(s=>s.topic===topic)?.section || TOPICS[topic]?.name || 'Verbal Reasoning';}
     function cloneAnswer(v){return Array.isArray(v)?v.slice():v&&typeof v==='object'?Object.assign({},v):v;}
-    function isAnswered(q){const v=exam.answers[q.uid]; if(v===undefined||v===null)return false; if(q.kind==='multi'||q.kind==='order')return Array.isArray(v)&&v.length>0; if(q.kind==='match')return Object.values(v).some(x=>x); return String(v).length>0;}
+    function isAnswered(q){const v=exam.answers[q.uid]; if(v===undefined||v===null)return false; if(q.kind==='multi')return Array.isArray(v)&&v.length===(q.selectCount||(Array.isArray(q.answer)?q.answer.length:0)); if(q.kind==='order')return Array.isArray(v)&&v.length===(Array.isArray(q.answer)?q.answer.length:0); if(q.kind==='match')return v&&typeof v==='object'&&Object.keys(q.answer||{}).every(k=>String(v[k]||'').length>0); return String(v).length>0;}
     function answerLabel(q,value=q.answer){return fmtAnswer(value);}
     function displayValue(v){return fmtAnswer(v===undefined?'No answer selected':v);}
     function correctForExam(q,value){ if(q.kind==='multi'){const a=(q.answer||[]).map(key).sort().join('|'); const b=Array.isArray(value)?value.map(key).sort().join('|'):''; return a===b;} if(q.kind==='order'){if(!Array.isArray(value)||value.length!==q.answer.length)return false; return value.map(key).join('|')===q.answer.map(key).join('|');} if(q.kind==='match'){if(!value||typeof value!=='object')return false; return Object.keys(q.answer).every(k=>key(value[k]||'')===key(q.answer[k]));} return key(value||'')===key(q.answer||''); }
     function entryKind(entry){try{return entry.gen(entry.difficulty||3).kind||'mc';}catch(e){return 'mc';}}
     const ENTRY_KIND = new Map(BANK.map(e=>[e.id, entryKind(e)]));
-    function instantiate(entry,number){const q=entry.gen(entry.difficulty||((number-1)%5)+1); q.uid=`${entry.id}-${number}-${Math.random().toString(36).slice(2,8)}`; q.entryId=entry.id; q.number=number; q.section=sectionFor(q.topic); q.kind=q.kind||'mc'; if(q.kind==='mc'&&(!q.choices||!q.choices.length))q.choices=makeTextChoices(q.answer,[]); if(q.kind==='multi')q.selectCount=q.selectCount||(Array.isArray(q.answer)?q.answer.length:2); if(q.kind==='match')q.options=q.options||unique(q.pairs.map(p=>p.right)); return q;}
+    function studentTitle(title){const cleaned=String(title||'Verbal reasoning').replace(/^(?:Further|Additional|Final|Exam|Verified|Supplement)\s+/i,'').replace(/\s+/g,' ').trim(); return cleaned.charAt(0).toUpperCase()+cleaned.slice(1);}
+    function instantiate(entry,number){const q=entry.gen(entry.difficulty||((number-1)%5)+1); q.uid=`${entry.id}-${number}-${Math.random().toString(36).slice(2,8)}`; q.entryId=entry.id; q.number=number; q.section=sectionFor(q.topic); q.title=studentTitle(q.title||entry.title); q.kind=q.kind||'mc'; if(q.kind==='mc'&&(!q.choices||!q.choices.length))q.choices=makeTextChoices(q.answer,[]); if(q.kind==='multi')q.selectCount=q.selectCount||(Array.isArray(q.answer)?q.answer.length:2); if(q.kind==='match')q.options=q.options||unique(q.pairs.map(p=>p.right)); return q;}
     function pickEntriesByTopic(topic,count,used){let pool=shuffle(BANK.filter(e=>e.topic===topic&&!used.has(e.id))); if(pool.length<count)pool=pool.concat(shuffle(BANK.filter(e=>e.topic===topic))); const out=[]; for(const e of pool){if(out.length>=count)break; out.push(e); used.add(e.id);} return out;}
-    function createQuestionSet(full=true){const used=new Set(); let entries=[]; if(full){EXAM_SPEC.forEach(spec=>entries.push(...pickEntriesByTopic(spec.topic,spec.count,used)));} else {([{topic:'vocab',count:4},{topic:'analogies',count:3},{topic:'classification',count:3},{topic:'compounds',count:3},{topic:'codes',count:4},{topic:'sequences',count:3},{topic:'wordplay',count:3},{topic:'logic',count:2}]).forEach(spec=>entries.push(...pickEntriesByTopic(spec.topic,spec.count,used)));} function ensureKind(kind,target){let have=entries.filter(e=>ENTRY_KIND.get(e.id)===kind).length; if(have>=target)return; const candidates=shuffle(BANK.filter(e=>ENTRY_KIND.get(e.id)===kind&&!used.has(e.id))); for(const cand of candidates){if(have>=target)break; let idx=entries.findIndex(e=>e.topic===cand.topic&&ENTRY_KIND.get(e.id)==='mc'); if(idx<0)idx=entries.findIndex(e=>ENTRY_KIND.get(e.id)==='mc'); if(idx>=0){used.delete(entries[idx].id); entries[idx]=cand; used.add(cand.id); have++;}}} ensureKind('multi',full?6:2); ensureKind('match',full?4:1); ensureKind('order',full?4:1); entries=shuffle(entries); return entries.map((entry,i)=>instantiate(entry,i+1));}
-    function startExam(full=true){clearInterval(exam.timerId); exam.questions=createQuestionSet(full); exam.answers={}; exam.flagged=new Set(); exam.index=0; exam.results=[]; exam.score=0; exam.finished=false; exam.review=false; exam.totalSeconds=full?3000:1200; exam.endsAt=Date.now()+exam.totalSeconds*1000; examEls.startScreen.classList.add('hidden'); examEls.resultsScreen.classList.add('hidden'); examEls.examScreen.classList.remove('hidden'); examEls.finishBtn.textContent='Finish test'; examEls.flagBtn.textContent='Flag question'; examEls.reviewFeedback.classList.add('hidden'); examEls.prevBtn.disabled=false; tickTimer(); exam.timerId=setInterval(tickTimer,1000); renderExamQuestion(); window.scrollTo({top:0,behavior:'smooth'});}
+    function normaliseQuestionPart(value){return String(value??'').replace(/<[^>]*>/g,' ').replace(/&(?:[a-z]+|#\d+);/gi,' ').replace(/\s+/g,' ').trim().toLowerCase();}
+    function questionSignature(q){let interaction=''; if(q.kind==='match')interaction=`${(q.pairs||[]).map(p=>p.left).join('|')}|${(q.options||[]).slice().sort().join('|')}`; else if(q.kind==='order')interaction=(q.tiles||[]).slice().sort().join('|'); else interaction=(q.choices||[]).map(c=>c.label).slice().sort().join('|'); return [q.prompt,q.stimulus,interaction].map(normaliseQuestionPart).join(' || ');}
+    function questionIsSuitable(q){if(q.kind!=='mc')return true; const generic=new Set(['cannot tell','none of these','both are possible','all of these','same meaning','opposite meaning','both','neither','same rule','different rule']); return (q.choices||[]).every(c=>key(c.value)===key(q.answer)||!generic.has(key(c.value)));}
+    function instantiateWithoutRepeats(entries){const signatures=new Set(), reservedIds=new Set(entries.map(e=>e.id)); return entries.map((original,index)=>{let candidate=original; const wantedKind=ENTRY_KIND.get(original.id), alternatives=shuffle(BANK.filter(e=>e.topic===original.topic&&ENTRY_KIND.get(e.id)===wantedKind&&!reservedIds.has(e.id))); for(let attempt=0;attempt<500;attempt++){if(attempt>0&&attempt%3===0&&alternatives.length){candidate=alternatives.pop(); reservedIds.add(candidate.id);} const q=instantiate(candidate,index+1); if(!questionIsSuitable(q))continue; const signature=questionSignature(q); if(!signatures.has(signature)){signatures.add(signature); return q;}} throw new Error(`A unique ${original.topic} ${wantedKind} question could not be created from ${original.title}.`);});}
+    function createQuestionSet(full=true){const used=new Set(); let entries=[]; if(full){EXAM_SPEC.forEach(spec=>entries.push(...pickEntriesByTopic(spec.topic,spec.count,used)));} else {([{topic:'vocab',count:4},{topic:'analogies',count:3},{topic:'classification',count:3},{topic:'compounds',count:3},{topic:'codes',count:4},{topic:'sequences',count:3},{topic:'wordplay',count:3},{topic:'logic',count:2}]).forEach(spec=>entries.push(...pickEntriesByTopic(spec.topic,spec.count,used)));} function ensureKind(kind,target){let have=entries.filter(e=>ENTRY_KIND.get(e.id)===kind).length; if(have>=target)return; const candidates=shuffle(BANK.filter(e=>ENTRY_KIND.get(e.id)===kind&&!used.has(e.id))); for(const cand of candidates){if(have>=target)break; const idx=entries.findIndex(e=>e.topic===cand.topic&&ENTRY_KIND.get(e.id)==='mc'); if(idx>=0){used.delete(entries[idx].id); entries[idx]=cand; used.add(cand.id); have++;}}} ensureKind('multi',full?6:2); ensureKind('match',full?4:1); ensureKind('order',full?4:1); entries=shuffle(entries); return instantiateWithoutRepeats(entries);}
+    function startExam(full=true){clearInterval(exam.timerId); exam.questions=createQuestionSet(full); exam.answers={}; exam.flagged=new Set(); exam.index=0; exam.results=[]; exam.score=0; exam.finished=false; exam.review=false; exam.totalSeconds=full?3000:1200; exam.endsAt=Date.now()+exam.totalSeconds*1000; examEls.examTitle.textContent=full?'Full practice':'Short practice'; examEls.startScreen.classList.add('hidden'); examEls.resultsScreen.classList.add('hidden'); examEls.examScreen.classList.remove('hidden'); examEls.finishBtn.classList.remove('hidden'); examEls.finishBtn.textContent='Finish practice'; examEls.flagBtn.textContent='Flag question'; examEls.reviewFeedback.classList.add('hidden'); examEls.prevBtn.disabled=false; tickTimer(); exam.timerId=setInterval(tickTimer,1000); renderExamQuestion(); window.scrollTo({top:0,behavior:'smooth'});}
     function tickTimer(){const remain=Math.max(0,Math.ceil((exam.endsAt-Date.now())/1000)); const m=Math.floor(remain/60), s=remain%60; examEls.timer.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; if(remain<=0&&!exam.finished&&exam.questions.length)finishExam(true);}
     function currentQ(){return exam.questions[exam.index];}
-    function renderTop(){const total=exam.questions.length, answered=exam.questions.filter(isAnswered).length; examEls.progressText.textContent=`${exam.review?'Review':'Question'} ${exam.index+1} of ${total}`; examEls.answeredText.textContent=`${answered} answered`; examEls.progressFill.style.width=`${((exam.index+1)/total)*100}%`; examEls.questionNav.innerHTML=exam.questions.map((q,i)=>`<button type="button" class="nav-btn ${i===exam.index?'current':''} ${isAnswered(q)?'answered':''} ${exam.flagged.has(q.uid)?'flagged':''}" data-index="${i}">${i+1}</button>`).join(''); examEls.questionNav.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{exam.index=Number(btn.dataset.index); exam.review?renderReviewQuestion():renderExamQuestion();})); examEls.miniReview.innerHTML=exam.questions.slice(Math.max(0,exam.index-3),Math.min(total,exam.index+4)).map((q,i)=>{const real=Math.max(0,exam.index-3)+i; return `<div class="mini-row"><span>Q${real+1}</span><span>${isAnswered(q)?'answered':'blank'}${exam.flagged.has(q.uid)?' · flagged':''}</span></div>`;}).join('');}
-    function renderExamQuestion(){if(!exam.questions.length)return; const q=currentQ(); renderTop(); examEls.questionNumber.textContent=`Question ${exam.index+1}`; examEls.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">1 mark</span>`; examEls.stimulusBox.innerHTML=q.stimulus||''; examEls.questionText.innerHTML=escapeHtml(q.prompt); examEls.reviewFeedback.classList.add('hidden'); examEls.flagBtn.textContent=exam.flagged.has(q.uid)?'Unflag question':'Flag question'; examEls.nextBtn.textContent=exam.index===exam.questions.length-1?'Last question':'Next'; renderAnswerInput(q); updateSide();}
+    function renderTop(){const total=exam.questions.length, answered=exam.questions.filter(isAnswered).length; examEls.progressText.textContent=`${exam.review?'Review':'Question'} ${exam.index+1} of ${total}`; examEls.answeredText.textContent=`${answered} answered`; examEls.progressFill.style.width=`${((exam.index+1)/total)*100}%`; examEls.meter.setAttribute('aria-valuemax',String(total)); examEls.meter.setAttribute('aria-valuenow',String(exam.index+1)); examEls.questionNav.innerHTML=exam.questions.map((q,i)=>{const states=[isAnswered(q)?'answered':'not answered',exam.flagged.has(q.uid)?'flagged':''].filter(Boolean).join(', '); return `<button type="button" class="nav-btn ${i===exam.index?'current':''} ${isAnswered(q)?'answered':''} ${exam.flagged.has(q.uid)?'flagged':''}" data-index="${i}" aria-label="Question ${i+1}: ${states}" ${i===exam.index?'aria-current="step"':''}>${i+1}</button>`;}).join(''); examEls.questionNav.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{exam.index=Number(btn.dataset.index); exam.review?renderReviewQuestion():renderExamQuestion();})); examEls.miniReview.innerHTML=exam.questions.slice(Math.max(0,exam.index-3),Math.min(total,exam.index+4)).map((q,i)=>{const real=Math.max(0,exam.index-3)+i; return `<div class="mini-row"><span>Q${real+1}</span><span>${isAnswered(q)?'answered':'not answered'}${exam.flagged.has(q.uid)?' · flagged':''}</span></div>`;}).join('');}
+    function renderExamQuestion(){if(!exam.questions.length)return; const q=currentQ(); renderTop(); examEls.questionNumber.textContent=`Question ${exam.index+1}`; examEls.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">1 mark</span>`; examEls.stimulusBox.innerHTML=q.stimulus||''; examEls.questionText.innerHTML=escapeHtml(q.prompt); examEls.reviewFeedback.classList.add('hidden'); examEls.flagBtn.textContent=exam.flagged.has(q.uid)?'Remove flag':'Flag question'; examEls.prevBtn.disabled=exam.index===0; examEls.nextBtn.textContent=exam.index===exam.questions.length-1?'Finish practice':'Next'; renderAnswerInput(q); updateSide(); examEls.questionPanel.focus({preventScroll:true});}
     function updateSide(){const q=currentQ(), ans=exam.answers[q.uid]; examEls.sideSummary.innerHTML=`<strong>${escapeHtml(q.section)}</strong><br>${escapeHtml(q.title)}<br><br><strong>Your answer:</strong><br>${escapeHtml(isAnswered(q)?displayValue(ans):'No answer selected')}`;}
     function setAnswer(q,value){exam.answers[q.uid]=cloneAnswer(value); renderAnswerInput(q); renderTop(); updateSide();}
     function renderAnswerInput(q){if(q.kind==='multi')return renderMultiInput(q); if(q.kind==='order')return renderOrderInput(q); if(q.kind==='match')return renderMatchInput(q); return renderMCInput(q);}
-    function renderMCInput(q){const selected=exam.answers[q.uid]; examEls.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((c,i)=>`<button type="button" class="choice-btn ${key(selected||'')===key(c.value)?'selected':''}" data-value="${escapeHtml(c.value)}"><span class="choice-letter">${letters[i]}</span><span>${escapeHtml(c.label)}</span></button>`).join('')}</div>`; examEls.answerArea.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>setAnswer(q,btn.dataset.value)));}
-    function renderMultiInput(q){const selected=new Set(Array.isArray(exam.answers[q.uid])?exam.answers[q.uid].map(String):[]), limit=q.selectCount||q.answer.length; examEls.answerArea.innerHTML=`<div class="multi-note">Select ${limit} answer${limit===1?'':'s'}.</div><div class="multi-grid">${q.choices.map(c=>`<button type="button" class="multi-btn ${selected.has(String(c.value))?'selected':''}" data-value="${escapeHtml(c.value)}">${escapeHtml(c.label)}</button>`).join('')}</div>`; examEls.answerArea.querySelectorAll('.multi-btn').forEach(btn=>btn.addEventListener('click',()=>{const cur=new Set(Array.isArray(exam.answers[q.uid])?exam.answers[q.uid]:[]), v=btn.dataset.value; if(cur.has(v))cur.delete(v); else if(cur.size<limit)cur.add(v); setAnswer(q,Array.from(cur));}));}
-    function renderOrderInput(q){const selected=Array.isArray(exam.answers[q.uid])?exam.answers[q.uid].slice():[]; const remaining=q.tiles.map(String).filter(t=>!selected.some(s=>key(s)===key(t))); examEls.answerArea.innerHTML=`<div class="order-area"><div><strong>Your order:</strong></div><div class="slot-row">${q.answer.map((_,i)=>`<button type="button" class="answer-slot" data-slot="${i}">${escapeHtml(selected[i]||'')}</button>`).join('')}</div><div><strong>Choose from:</strong></div><div class="tile-row">${remaining.map(t=>`<button type="button" class="tile-btn" data-tile="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div><button type="button" class="secondary" id="clearOrderBtn">Clear order</button></div>`; examEls.answerArea.querySelectorAll('.tile-btn').forEach(btn=>btn.addEventListener('click',()=>{if(selected.length>=q.answer.length)return; selected.push(btn.dataset.tile); setAnswer(q,selected);})); examEls.answerArea.querySelectorAll('.answer-slot').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.slot); if(selected[idx]){selected.splice(idx,1); setAnswer(q,selected);}})); document.getElementById('clearOrderBtn').addEventListener('click',()=>setAnswer(q,[]));}
-    function renderMatchInput(q){const selected=Object.assign({},exam.answers[q.uid]||{}), opts=q.options||unique(q.pairs.map(p=>p.right)); examEls.answerArea.innerHTML=`<div class="match-area">${q.pairs.map(p=>`<div class="match-row"><div class="match-term">${escapeHtml(p.left)}</div><select data-left="${escapeHtml(p.left)}"><option value="">Choose…</option>${opts.map(o=>`<option value="${escapeHtml(o)}" ${key(selected[p.left]||'')===key(o)?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></div>`).join('')}</div>`; examEls.answerArea.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',()=>{selected[sel.dataset.left]=sel.value; setAnswer(q,selected);}));}
+    function renderMCInput(q){const selected=exam.answers[q.uid]; examEls.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((c,i)=>{const chosen=key(selected||'')===key(c.value); return `<button type="button" class="choice-btn ${chosen?'selected':''}" data-value="${escapeHtml(c.value)}" aria-pressed="${chosen}"><span class="choice-letter">${letters[i]}</span><span>${escapeHtml(c.label)}</span></button>`;}).join('')}</div>`; examEls.answerArea.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>setAnswer(q,btn.dataset.value)));}
+    function renderMultiInput(q){const selected=new Set(Array.isArray(exam.answers[q.uid])?exam.answers[q.uid].map(String):[]), limit=q.selectCount||q.answer.length; examEls.answerArea.innerHTML=`<div class="multi-note">Select ${limit} answer${limit===1?'':'s'}.</div><div class="multi-grid">${q.choices.map(c=>{const chosen=selected.has(String(c.value)); return `<button type="button" class="multi-btn ${chosen?'selected':''}" data-value="${escapeHtml(c.value)}" aria-pressed="${chosen}">${escapeHtml(c.label)}</button>`;}).join('')}</div>`; examEls.answerArea.querySelectorAll('.multi-btn').forEach(btn=>btn.addEventListener('click',()=>{const cur=new Set(Array.isArray(exam.answers[q.uid])?exam.answers[q.uid]:[]), v=btn.dataset.value; if(cur.has(v))cur.delete(v); else if(cur.size<limit)cur.add(v); setAnswer(q,Array.from(cur));}));}
+    function renderOrderInput(q){const selected=Array.isArray(exam.answers[q.uid])?exam.answers[q.uid].slice():[]; const selectedKeys=selected.map(key), remaining=q.tiles.map(String).filter(t=>{const i=selectedKeys.indexOf(key(t)); if(i<0)return true; selectedKeys.splice(i,1); return false;}); examEls.answerArea.innerHTML=`<div class="order-area"><div><strong>Your order:</strong></div><div class="slot-row">${q.answer.map((_,i)=>`<button type="button" class="answer-slot" data-slot="${i}" aria-label="Position ${i+1}: ${escapeHtml(selected[i]||'empty')}">${escapeHtml(selected[i]||'')}</button>`).join('')}</div><div><strong>Choose from:</strong></div><div class="tile-row">${remaining.map(t=>`<button type="button" class="tile-btn" data-tile="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div><button type="button" class="secondary" id="clearOrderBtn">Clear order</button></div>`; examEls.answerArea.querySelectorAll('.tile-btn').forEach(btn=>btn.addEventListener('click',()=>{if(selected.length>=q.answer.length)return; selected.push(btn.dataset.tile); setAnswer(q,selected);})); examEls.answerArea.querySelectorAll('.answer-slot').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.slot); if(selected[idx]){selected.splice(idx,1); setAnswer(q,selected);}})); document.getElementById('clearOrderBtn').addEventListener('click',()=>setAnswer(q,[]));}
+    function renderMatchInput(q){const selected=Object.assign({},exam.answers[q.uid]||{}), opts=q.options||unique(q.pairs.map(p=>p.right)); examEls.answerArea.innerHTML=`<div class="match-area">${q.pairs.map((p,i)=>`<div class="match-row"><label class="match-term" for="match-${i}">${escapeHtml(p.left)}</label><select id="match-${i}" data-left="${escapeHtml(p.left)}"><option value="">Choose…</option>${opts.map(o=>`<option value="${escapeHtml(o)}" ${key(selected[p.left]||'')===key(o)?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></div>`).join('')}</div>`; examEls.answerArea.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',()=>{selected[sel.dataset.left]=sel.value; setAnswer(q,selected);}));}
     function go(delta){exam.index=clamp(exam.index+delta,0,exam.questions.length-1); renderExamQuestion();}
-    function finishExam(timedOut=false){if(exam.finished)return; if(!timedOut){const blank=exam.questions.length-exam.questions.filter(isAnswered).length; if(blank>0&&!confirm(`You have ${blank} unanswered question${blank===1?'':'s'}. Finish the test now?`))return;} clearInterval(exam.timerId); exam.finished=true; exam.results=exam.questions.map(q=>{const user=exam.answers[q.uid]; const correct=correctForExam(q,user); return {q,user,correct};}); exam.score=exam.results.filter(r=>r.correct).length; showResults(timedOut);}
-    function topicFeedback(section,pct){if(pct>=75)return 'Strong performance. Keep practising under time pressure so accuracy stays high.'; if(pct>=50)return 'Amber area. Review the questions you missed and practise this type again.'; return 'Red area. Slow down in review, look for the rule or relationship, then try a short focused practice set.';}
-    function feedbackForReview(q,r){const base=q.explanation||'Look again at the relationship or rule in the question.'; if(r.correct)return `Correct. ${base}`; const noAnswer=r.user===undefined||r.user===null||(Array.isArray(r.user)&&r.user.length===0)||(typeof r.user==='object'&&!Array.isArray(r.user)&&Object.values(r.user).every(v=>!v)); if(noAnswer)return `No answer was selected. ${base}`; return `Your answer does not fit the required rule or relationship. ${base}`;}
-    function showResults(timedOut=false){examEls.examScreen.classList.add('hidden'); examEls.resultsScreen.classList.remove('hidden'); const pct=Math.round(exam.score/exam.questions.length*100); examEls.scoreDisplay.textContent=`${exam.score}/${exam.questions.length}`; examEls.percentDisplay.textContent=`${pct}%${timedOut?' · Time expired':''}`; const sections={}; exam.results.forEach(r=>{const sec=r.q.section; if(!sections[sec])sections[sec]={total:0,correct:0,skills:{}}; sections[sec].total++; if(r.correct)sections[sec].correct++; if(!r.correct)sections[sec].skills[r.q.title]=(sections[sec].skills[r.q.title]||0)+1;}); examEls.heatMap.innerHTML=Object.keys(sections).map(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100), cls=sp>=75?'green-card':sp>=50?'amber-card':'red-card', rag=sp>=75?'Green':sp>=50?'Amber':'Red'; return `<div class="heat-card ${cls}"><h3>${escapeHtml(sec)}</h3><strong>${rag}</strong><div>${s.correct}/${s.total} · ${sp}%</div><p>${escapeHtml(topicFeedback(sec,sp))}</p></div>`;}).join(''); const weakest=Object.keys(sections).map(sec=>({sec,pct:sections[sec].correct/sections[sec].total})).sort((a,b)=>a.pct-b.pct)[0]; const overall=pct>=85?'Excellent result. Your verbal reasoning accuracy is strong across the paper. Review any amber areas so speed does not cost marks.':pct>=65?`Good result. Focus next on ${weakest?.sec||'the lowest section'} and check the feedback on any incorrect questions.`:`This test shows that ${weakest?.sec||'verbal reasoning'} needs the most work. Review the explanations, then practise one section at a time before another timed paper.`; examEls.overallFeedback.textContent=overall; examEls.resultsReviewList.innerHTML=exam.results.map((r,i)=>`<div class="review-item"><div class="review-main"><span>Q${i+1}: ${escapeHtml(r.q.title)} <em style="color:#667">(${escapeHtml(r.q.section)})</em></span>${r.correct?'':`<div class="wrong-explain"><strong>Why:</strong> ${escapeHtml(feedbackForReview(r.q,r))}</div>`}</div><span class="mark ${r.correct?'ok':'no'}">${r.correct?'✓ correct':'✗ review'}</span></div>`).join(''); buildPrintResults(sections,pct,overall); window.scrollTo({top:0,behavior:'smooth'});}
-    function renderReviewQuestion(index=exam.index){exam.review=true; exam.index=clamp(index,0,exam.questions.length-1); examEls.resultsScreen.classList.add('hidden'); examEls.examScreen.classList.remove('hidden'); const q=currentQ(), r=exam.results[exam.index]; renderTop(); examEls.questionNumber.textContent=`Review question ${exam.index+1}`; examEls.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">${r.correct?'Correct':'Needs review'}</span>`; examEls.stimulusBox.innerHTML=q.stimulus||''; examEls.questionText.innerHTML=escapeHtml(q.prompt); renderLockedAnswer(q,r); examEls.reviewFeedback.className=`feedback ${r.correct?'good':'bad'}`; const lead=r.correct?'Correct.':'Why this was wrong:'; examEls.reviewFeedback.innerHTML=`<strong>${lead}</strong><br>${escapeHtml(feedbackForReview(q,r))}<br><strong>Your answer:</strong> ${escapeHtml(displayValue(r.user))}<br><strong>Correct answer:</strong> ${escapeHtml(answerLabel(q))}`; examEls.reviewFeedback.classList.remove('hidden'); examEls.sideSummary.innerHTML=`<strong>Your answer:</strong><br>${escapeHtml(displayValue(r.user))}<br><br><strong>Correct answer:</strong><br>${escapeHtml(answerLabel(q))}`; examEls.flagBtn.textContent='Back to results'; examEls.finishBtn.textContent='Results'; examEls.nextBtn.textContent=exam.index===exam.questions.length-1?'End of review':'Next review'; examEls.prevBtn.disabled=exam.index===0; examEls.nextBtn.disabled=false;}
-    function renderLockedAnswer(q,r){const user=r.user; if(q.kind==='multi'){const selected=new Set(Array.isArray(user)?user.map(key):[]), answers=new Set(q.answer.map(key)); examEls.answerArea.innerHTML=`<div class="multi-grid">${q.choices.map(c=>`<button type="button" disabled class="multi-btn ${answers.has(key(c.value))?'correct':''} ${selected.has(key(c.value))&&!answers.has(key(c.value))?'wrong':''}">${escapeHtml(c.label)}</button>`).join('')}</div>`; return;} if(q.kind==='order'){const arr=Array.isArray(user)&&user.length?user:[]; examEls.answerArea.innerHTML=`<div class="order-area"><strong>Your order</strong><div class="slot-row">${(arr.length?arr:['No answer selected']).map((item,i)=>`<button type="button" disabled class="answer-slot ${key(item)===key(q.answer[i]||'')?'correct':'wrong'}">${escapeHtml(item)}</button>`).join('')}</div><strong>Correct order</strong><div class="slot-row">${q.answer.map(item=>`<button type="button" disabled class="answer-slot correct">${escapeHtml(item)}</button>`).join('')}</div></div>`; return;} if(q.kind==='match'){const u=user||{}; examEls.answerArea.innerHTML=`<div class="match-area">${Object.keys(q.answer).map(term=>`<div class="match-row"><div class="match-term">${escapeHtml(term)}</div><div class="match-term ${key(u[term]||'')===key(q.answer[term])?'correct':'wrong'}">${escapeHtml(u[term]||'Blank')} ${key(u[term]||'')===key(q.answer[term])?'✓':'→ '+escapeHtml(q.answer[term])}</div></div>`).join('')}</div>`; return;} examEls.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((c,i)=>{const isUser=user!==undefined&&key(user)===key(c.value), isAns=key(q.answer)===key(c.value); return `<button type="button" disabled class="choice-btn ${isAns?'correct':''} ${isUser&&!isAns?'wrong':''}"><span class="choice-letter">${letters[i]}</span><span>${escapeHtml(c.label)}</span></button>`;}).join('')}</div>`;}
-    function backToResults(){exam.review=false; examEls.examScreen.classList.add('hidden'); examEls.resultsScreen.classList.remove('hidden'); examEls.prevBtn.disabled=false; examEls.nextBtn.disabled=false; examEls.finishBtn.textContent='Finish test'; examEls.flagBtn.textContent='Flag question'; window.scrollTo({top:0,behavior:'smooth'});}
-    function buildPrintResults(sections,pct,overall){examEls.printResults.innerHTML=`<h1>11+ Verbal Reasoning Exam Practice Results</h1><p>Score: ${exam.score}/${exam.questions.length} (${pct}%)</p><p>${escapeHtml(overall)}</p><h2>Topic heat map</h2>${Object.keys(sections).map(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100); return `<p><strong>${escapeHtml(sec)}</strong>: ${s.correct}/${s.total} (${sp}%)</p>`;}).join('')}`;}
-    function pdfEscape(s){return String(s).replace(/[\\()]/g,'\\$&').replace(/£/g,'GBP').replace(/[“”]/g,'"').replace(/[‘’]/g,"'");}
-    function downloadResultsPDF(){const pct=Math.round(exam.score/exam.questions.length*100), lines=['11+ Verbal Reasoning Exam Practice Results',`Score: ${exam.score}/${exam.questions.length} (${pct}%)`,`Date: ${new Date().toLocaleString()}`,'','Topic heat map:']; const sections={}; exam.results.forEach(r=>{const sec=r.q.section; if(!sections[sec])sections[sec]={total:0,correct:0}; sections[sec].total++; if(r.correct)sections[sec].correct++;}); Object.keys(sections).forEach(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100); lines.push(`${sec}: ${s.correct}/${s.total} (${sp}%) - ${sp>=75?'Green':sp>=50?'Amber':'Red'}`);}); lines.push('','Questions to review:'); exam.results.forEach((r,i)=>{if(!r.correct){lines.push(`Q${i+1} ${r.q.section} - ${r.q.title}`); lines.push(`Correct answer: ${answerLabel(r.q)}`); lines.push(`Why: ${feedbackForReview(r.q,r)}`);}}); if(exam.results.every(r=>r.correct))lines.push('No incorrect questions. Excellent work.'); createSimplePdf(lines,'11_plus_verbal_reasoning_exam_results.pdf');}
-    function createSimplePdf(lines,filename){const pageLines=[]; for(let i=0;i<lines.length;i+=42)pageLines.push(lines.slice(i,i+42)); const objects=[]; function add(obj){objects.push(obj); return objects.length;} add('<< /Type /Catalog /Pages 2 0 R >>'); const pagesIndex=add(''), font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'), pageRefs=[]; pageLines.forEach(pl=>{const content='BT /F1 11 Tf 50 790 Td 14 TL '+pl.map(line=>`(${pdfEscape(line).slice(0,96)}) Tj T*`).join(' ')+' ET'; const contentObj=add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`); const pageObj=add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${contentObj} 0 R >>`); pageRefs.push(`${pageObj} 0 R`);}); objects[pagesIndex-1]=`<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pageRefs.length} >>`; let pdf='%PDF-1.4\n'; const offsets=[0]; objects.forEach((obj,i)=>{offsets[i+1]=pdf.length; pdf+=`${i+1} 0 obj\n${obj}\nendobj\n`;}); const xref=pdf.length; pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(o=>String(o).padStart(10,'0')+' 00000 n ').join('\n')+`\ntrailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`; const blob=new Blob([pdf],{type:'application/pdf'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500);}
-    examEls.bankCount.textContent=`${BANK.length}+`;
+    function finishExam(timedOut=false){if(exam.finished)return; if(!timedOut){const blank=exam.questions.length-exam.questions.filter(isAnswered).length; if(blank>0&&!confirm(`You have ${blank} unanswered question${blank===1?'':'s'}. Finish the practice now?`))return;} clearInterval(exam.timerId); exam.finished=true; exam.results=exam.questions.map(q=>{const user=exam.answers[q.uid]; const correct=correctForExam(q,user); return {q,user,correct};}); exam.score=exam.results.filter(r=>r.correct).length; showResults(timedOut);}
+    function topicFeedback(section,pct){if(pct>=75)return 'Strong work. Keep practising under time pressure so your accuracy stays high.'; if(pct>=50)return 'Review the questions you missed and practise this type again.'; return 'Look at the worked answers, then try a short practice on this topic.';}
+    function feedbackForReview(q,r){const base=q.explanation||'Look again at the relationship or rule in the question.'; if(r.correct)return base; const noAnswer=r.user===undefined||r.user===null||(Array.isArray(r.user)&&r.user.length===0)||(typeof r.user==='object'&&!Array.isArray(r.user)&&Object.values(r.user).every(v=>!v)); if(noAnswer)return `No answer was selected. ${base}`; return `Your answer does not fit the required rule or relationship. ${base}`;}
+    function showResults(timedOut=false){examEls.examScreen.classList.add('hidden'); examEls.resultsScreen.classList.remove('hidden'); const pct=Math.round(exam.score/exam.questions.length*100); examEls.scoreDisplay.textContent=`${exam.score}/${exam.questions.length}`; examEls.percentDisplay.textContent=`${pct}%${timedOut?' · Time expired':''}`; const sections={}; exam.results.forEach(r=>{const sec=r.q.section; if(!sections[sec])sections[sec]={total:0,correct:0,skills:{}}; sections[sec].total++; if(r.correct)sections[sec].correct++; if(!r.correct)sections[sec].skills[r.q.title]=(sections[sec].skills[r.q.title]||0)+1;}); examEls.heatMap.innerHTML=Object.keys(sections).map(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100), cls=sp>=75?'green-card':sp>=50?'amber-card':'red-card', label=sp>=75?'Strong':sp>=50?'Keep practising':'Practise next'; return `<div class="heat-card ${cls}"><h3>${escapeHtml(sec)}</h3><strong>${label}</strong><div>${s.correct}/${s.total} · ${sp}%</div><p>${escapeHtml(topicFeedback(sec,sp))}</p></div>`;}).join(''); const weakest=Object.keys(sections).map(sec=>({sec,pct:sections[sec].correct/sections[sec].total})).sort((a,b)=>a.pct-b.pct)[0]; const overall=pct>=85?'Excellent result. Your verbal reasoning accuracy is strong across this practice. Review any questions you missed so speed does not cost marks.':pct>=65?`Good result. Focus next on ${weakest?.sec||'the topic with your lowest score'} and check the worked answers.`:`Focus next on ${weakest?.sec||'the topic with your lowest score'}. Review the worked answers, then practise one topic at a time before trying another timed set.`; examEls.overallFeedback.textContent=overall; examEls.resultsReviewList.innerHTML=exam.results.map((r,i)=>`<div class="review-item"><div class="review-main"><span>Q${i+1}: ${escapeHtml(r.q.title)} <em style="color:#667">(${escapeHtml(r.q.section)})</em></span>${r.correct?'':`<div class="wrong-explain"><strong>How to work it out:</strong> ${escapeHtml(feedbackForReview(r.q,r))}</div>`}</div><span class="mark ${r.correct?'ok':'no'}">${r.correct?'✓ correct':'✗ review'}</span></div>`).join(''); buildPrintResults(sections,pct,overall); window.scrollTo({top:0,behavior:'smooth'});}
+    function renderReviewQuestion(index=exam.index){exam.review=true; exam.index=clamp(index,0,exam.questions.length-1); examEls.resultsScreen.classList.add('hidden'); examEls.examScreen.classList.remove('hidden'); const q=currentQ(), r=exam.results[exam.index]; renderTop(); examEls.questionNumber.textContent=`Review question ${exam.index+1}`; examEls.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">${r.correct?'Correct':'Needs review'}</span>`; examEls.stimulusBox.innerHTML=q.stimulus||''; examEls.questionText.innerHTML=escapeHtml(q.prompt); renderLockedAnswer(q,r); examEls.reviewFeedback.className=`feedback ${r.correct?'good':'bad'}`; const lead=r.correct?'Correct.':'How to work it out:'; examEls.reviewFeedback.innerHTML=`<strong>${lead}</strong><br>${escapeHtml(feedbackForReview(q,r))}<br><strong>Your answer:</strong> ${escapeHtml(displayValue(r.user))}<br><strong>Correct answer:</strong> ${escapeHtml(answerLabel(q))}`; examEls.reviewFeedback.classList.remove('hidden'); examEls.sideSummary.innerHTML=`<strong>Your answer:</strong><br>${escapeHtml(displayValue(r.user))}<br><br><strong>Correct answer:</strong><br>${escapeHtml(answerLabel(q))}`; examEls.flagBtn.textContent='Back to results'; examEls.finishBtn.classList.add('hidden'); examEls.nextBtn.textContent=exam.index===exam.questions.length-1?'Back to results':'Next review'; examEls.prevBtn.disabled=exam.index===0; examEls.nextBtn.disabled=false; examEls.questionPanel.focus({preventScroll:true});}
+    function renderLockedAnswer(q,r){
+      const user=r.user;
+      if(q.kind==='multi'){
+        const selected=new Set(Array.isArray(user)?user.map(key):[]), answers=new Set(q.answer.map(key));
+        examEls.answerArea.innerHTML=`<div class="multi-grid">${q.choices.map(c=>{const correct=answers.has(key(c.value)), chosen=selected.has(key(c.value)); const status=correct?'correct answer':chosen?'your answer; not correct':'not selected'; return `<button type="button" disabled class="multi-btn ${correct?'correct':''} ${chosen&&!correct?'wrong':''}" aria-label="${escapeHtml(c.label)}: ${status}">${escapeHtml(c.label)}</button>`;}).join('')}</div>`;
+        return;
+      }
+      if(q.kind==='order'){
+        const arr=Array.isArray(user)&&user.length?user:[];
+        examEls.answerArea.innerHTML=`<div class="order-area"><strong>Your order</strong><div class="slot-row">${(arr.length?arr:['No answer selected']).map((item,i)=>`<button type="button" disabled class="answer-slot ${key(item)===key(q.answer[i]||'')?'correct':'wrong'}">${escapeHtml(item)}</button>`).join('')}</div><strong>Correct order</strong><div class="slot-row">${q.answer.map(item=>`<button type="button" disabled class="answer-slot correct">${escapeHtml(item)}</button>`).join('')}</div></div>`;
+        return;
+      }
+      if(q.kind==='match'){
+        const chosen=user||{};
+        examEls.answerArea.innerHTML=`<div class="match-area">${Object.keys(q.answer).map(term=>{const correct=key(chosen[term]||'')===key(q.answer[term]); return `<div class="match-row"><div class="match-term">${escapeHtml(term)}</div><div class="match-term ${correct?'correct':'wrong'}">${escapeHtml(chosen[term]||'Not answered')} ${correct?'✓':'→ '+escapeHtml(q.answer[term])}</div></div>`;}).join('')}</div>`;
+        return;
+      }
+      examEls.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((c,i)=>{const isUser=user!==undefined&&key(user)===key(c.value), isAns=key(q.answer)===key(c.value); const status=isAns?'correct answer':isUser?'your answer; not correct':'not selected'; return `<button type="button" disabled class="choice-btn ${isAns?'correct':''} ${isUser&&!isAns?'wrong':''}" aria-label="${escapeHtml(c.label)}: ${status}"><span class="choice-letter">${letters[i]}</span><span>${escapeHtml(c.label)}</span></button>`;}).join('')}</div>`;
+    }
+    function backToResults(){exam.review=false; examEls.examScreen.classList.add('hidden'); examEls.resultsScreen.classList.remove('hidden'); examEls.prevBtn.disabled=false; examEls.nextBtn.disabled=false; examEls.finishBtn.classList.remove('hidden'); examEls.finishBtn.textContent='Finish practice'; examEls.flagBtn.textContent='Flag question'; window.scrollTo({top:0,behavior:'smooth'});}
+    function buildPrintResults(sections,pct,overall){examEls.printResults.innerHTML=`<h1>11+ Verbal Reasoning Results</h1><p>Score: ${exam.score}/${exam.questions.length} (${pct}%)</p><p>${escapeHtml(overall)}</p><h2>How you did by topic</h2>${Object.keys(sections).map(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100); return `<p><strong>${escapeHtml(sec)}</strong>: ${s.correct}/${s.total} (${sp}%)</p>`;}).join('')}`;}
+    function pdfEscape(s){return String(s).replace(/£/g,'GBP').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/→/g,'->').replace(/[–—−]/g,'-').replace(/…/g,'...').replace(/×/g,'x').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,'').replace(/\s+/g,' ').replace(/[\\()]/g,'\\$&');}
+    function downloadResultsPDF(){const pct=Math.round(exam.score/exam.questions.length*100), lines=['11+ Verbal Reasoning Results',`Score: ${exam.score}/${exam.questions.length} (${pct}%)`,`Date: ${new Date().toLocaleString('en-GB')}`,'','How you did by topic:']; const sections={}; exam.results.forEach(r=>{const sec=r.q.section; if(!sections[sec])sections[sec]={total:0,correct:0}; sections[sec].total++; if(r.correct)sections[sec].correct++;}); Object.keys(sections).forEach(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100), label=sp>=75?'Strong':sp>=50?'Keep practising':'Practise next'; lines.push(`${sec}: ${s.correct}/${s.total} (${sp}%) - ${label}`);}); lines.push('','Questions to review:'); exam.results.forEach((r,i)=>{if(!r.correct){lines.push(`Q${i+1} ${r.q.section} - ${r.q.title}`); lines.push(`Correct answer: ${answerLabel(r.q)}`); lines.push(`How to work it out: ${feedbackForReview(r.q,r)}`);}}); if(exam.results.every(r=>r.correct))lines.push('No incorrect questions. Excellent work.'); createSimplePdf(lines,'11_plus_verbal_reasoning_results.pdf');}
+    function wrapPdfLines(lines,max=88){const wrapped=[]; lines.forEach(line=>{const words=String(line).trim().split(/\s+/).filter(Boolean); if(!words.length){wrapped.push(''); return;} let current=''; words.forEach(original=>{let word=original; while(word.length>max){if(current){wrapped.push(current); current='';} wrapped.push(word.slice(0,max)); word=word.slice(max);} const next=current?`${current} ${word}`:word; if(next.length>max){wrapped.push(current); current=word;} else current=next;}); if(current)wrapped.push(current);}); return wrapped;}
+    function createSimplePdf(lines,filename){const wrappedLines=wrapPdfLines(lines), pageLines=[]; for(let i=0;i<wrappedLines.length;i+=42)pageLines.push(wrappedLines.slice(i,i+42)); const objects=[]; function add(obj){objects.push(obj); return objects.length;} add('<< /Type /Catalog /Pages 2 0 R >>'); const pagesIndex=add(''), font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'), pageRefs=[]; pageLines.forEach(pl=>{const content='BT /F1 11 Tf 50 790 Td 14 TL '+pl.map(line=>`(${pdfEscape(line)}) Tj T*`).join(' ')+' ET'; const contentObj=add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`); const pageObj=add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${contentObj} 0 R >>`); pageRefs.push(`${pageObj} 0 R`);}); objects[pagesIndex-1]=`<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pageRefs.length} >>`; let pdf='%PDF-1.4\n'; const offsets=[0]; objects.forEach((obj,i)=>{offsets[i+1]=pdf.length; pdf+=`${i+1} 0 obj\n${obj}\nendobj\n`;}); const xref=pdf.length; pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(o=>String(o).padStart(10,'0')+' 00000 n ').join('\n')+`\ntrailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`; const blob=new Blob([pdf],{type:'application/pdf'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500);}
     examEls.startBtn.addEventListener('click',()=>startExam(true)); examEls.sampleBtn.addEventListener('click',()=>startExam(false));
-    examEls.prevBtn.addEventListener('click',()=>{if(exam.review)renderReviewQuestion(exam.index-1); else go(-1);}); examEls.nextBtn.addEventListener('click',()=>{if(exam.review){if(exam.index<exam.questions.length-1)renderReviewQuestion(exam.index+1);} else go(1);});
-    examEls.flagBtn.addEventListener('click',()=>{if(exam.review){backToResults(); return;} const q=currentQ(); if(exam.flagged.has(q.uid))exam.flagged.delete(q.uid); else exam.flagged.add(q.uid); renderTop(); updateSide();});
+    examEls.prevBtn.addEventListener('click',()=>{if(exam.review)renderReviewQuestion(exam.index-1); else go(-1);}); examEls.nextBtn.addEventListener('click',()=>{if(exam.review){if(exam.index<exam.questions.length-1)renderReviewQuestion(exam.index+1); else backToResults();} else if(exam.index<exam.questions.length-1)go(1); else finishExam(false);});
+    examEls.flagBtn.addEventListener('click',()=>{if(exam.review){backToResults(); return;} const q=currentQ(); if(exam.flagged.has(q.uid))exam.flagged.delete(q.uid); else exam.flagged.add(q.uid); examEls.flagBtn.textContent=exam.flagged.has(q.uid)?'Remove flag':'Flag question'; renderTop(); updateSide();});
     examEls.finishBtn.addEventListener('click',()=>{if(exam.review)backToResults(); else finishExam(false);}); examEls.downloadPdfBtn.addEventListener('click',downloadResultsPDF); examEls.reviewBtn.addEventListener('click',()=>renderReviewQuestion(0)); examEls.retakeBtn.addEventListener('click',()=>{examEls.resultsScreen.classList.add('hidden'); examEls.startScreen.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'});});
   </script>
 </body>
