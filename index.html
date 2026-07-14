@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -17,10 +18,10 @@
     h1 { margin:0; font-size:clamp(1.9rem,4vw,3rem); letter-spacing:.02em; text-transform:uppercase; }
     .instruction-box { border:1.5px solid #111; padding:16px 18px; margin:20px 0; line-height:1.5; }
     .instruction-box h2, .panel h2 { margin:0 0 10px; }
-    button, select { font:inherit; }
+    button, select, input { font:inherit; }
     button { border:0; border-radius:10px; padding:12px 16px; background:var(--accent); color:#fff; font-weight:700; cursor:pointer; }
     button:hover:not(:disabled) { filter:brightness(.96); }
-    button:focus-visible:not(:disabled), select:focus-visible { outline:3px solid #ffbf47; outline-offset:3px; }
+    button:focus-visible:not(:disabled), select:focus-visible, input:focus-visible { outline:3px solid #ffbf47; outline-offset:3px; }
     button:disabled { opacity:.65; cursor:not-allowed; }
     .secondary { background:#fff; color:#111; border:1px solid var(--line); }
     .danger { background:#b42929; }
@@ -28,6 +29,7 @@
     .topbar { position:sticky; top:0; z-index:8; padding:14px; border-radius:14px; margin-bottom:14px; }
     .toprow { display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center; }
     .timer { font-weight:900; font-size:1.15rem; border:2px solid #111; padding:7px 12px; border-radius:8px; background:#fff; }
+    .timer.low-time { border-color:var(--bad); color:var(--bad); background:#fff4f4; }
     .meter { height:10px; border:1px solid var(--line); border-radius:99px; background:#eef1f7; overflow:hidden; margin-top:10px; }
     .meter-fill { height:100%; width:0%; background:var(--accent); transition:width .2s ease; }
     .nav-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:5px; margin-top:12px; }
@@ -74,7 +76,20 @@
     .match-term { font-weight:900; background:#f6f7fa; padding:10px; border:1px solid var(--line); border-radius:8px; }
     .match-term.correct { border-color:var(--good); background:#edf8f0; }
     .match-term.wrong { border-color:var(--bad); background:#fff0f0; }
-    select { width:100%; border:2px solid var(--line); border-radius:8px; padding:10px; background:#fff; }
+    select, input[type="text"] { width:100%; border:2px solid var(--line); border-radius:8px; padding:10px; background:#fff; }
+    .setup-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin:16px 0; }
+    .field { display:grid; gap:6px; font-weight:700; }
+    .field small, .fine-print, .mode-note { color:var(--muted); font-weight:400; line-height:1.45; }
+    .check-field { display:flex; gap:9px; align-items:center; padding:10px; border:1px solid var(--line); border-radius:9px; background:var(--soft); }
+    .check-field input { width:20px; height:20px; }
+    .mode-card { flex:1 1 280px; border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--soft); }
+    .mode-card button { width:100%; }
+    .mode-card p { margin:8px 0 0; }
+    .save-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .raw-score-note { max-width:760px; margin:8px auto 0; color:var(--muted); line-height:1.5; }
+    body.large-text { font-size:118%; }
+    body.large-text .app { width:min(1240px,calc(100% - 20px)); }
+    body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; align-items:center; }
     .side-card { position:sticky; top:126px; }
     .answer-summary { color:var(--muted); line-height:1.45; }
@@ -97,15 +112,16 @@
     .wrong-explain { margin-top:6px; color:#6b2222; font-size:.92rem; line-height:1.35; }
     .mark { font-weight:900; white-space:nowrap; } .mark.ok { color:var(--good); } .mark.no { color:var(--bad); }
     .print-only { display:none; }
-    @media(max-width:850px) { .question-wrap { grid-template-columns:1fr; } .side-card { position:static; } .topbar { position:static; } }
+    @media(max-width:850px) { .question-wrap { grid-template-columns:1fr; } .side-card { position:static; } .topbar { position:static; } .exam-cover { padding:18px; } }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
     @media print { body { background:#fff; } .topbar,.actions,.side-card,.question-card,.exam-cover,#resultsScreen>.panel>.result-hero,#resultsScreen>.panel>h2,#resultsScreen>.panel>.heat-grid,#resultsScreen>.panel>#overallFeedback,#resultsScreen>.panel>.review-list { display:none!important; } .print-only { display:block; } .panel { box-shadow:none; border:0; } }
   </style>
 </head>
 <body>
   <main class="app">
-    <section class="screen" id="startScreen"><div class="exam-cover"><div class="cover-title"><h1>11+ Verbal Reasoning</h1></div><div class="instruction-box"><h2>Before you begin</h2><p>Choose one answer unless the question tells you otherwise. Some questions ask you to choose more than one answer, match words or put tiles in order.</p><p>Work carefully. If you are unsure, flag the question and return to it later. You do not lose marks for a wrong answer.</p></div><div class="actions"><button id="startBtn" type="button">Start full practice — 80 questions, 50 minutes</button><button class="secondary" id="sampleBtn" type="button">Start short practice — 25 questions, 20 minutes</button></div></div></section>
-    <section class="screen hidden" id="examScreen"><div class="topbar"><div class="toprow"><div><strong id="examTitle">Verbal Reasoning</strong> · <span id="progressText">Question 1 of 80</span> · <span id="answeredText">0 answered</span></div><div class="timer" id="timer" role="timer" aria-label="Time remaining">50:00</div></div><div class="meter" role="progressbar" aria-label="Question progress" aria-valuemin="1" aria-valuemax="80" aria-valuenow="1"><div class="meter-fill" id="progressFill"></div></div><div class="nav-grid" id="questionNav" aria-label="Question navigation"></div></div><div class="question-wrap"><article class="panel question-card" id="questionPanel" tabindex="-1"><h2 class="q-number" id="questionNumber">Question 1</h2><div class="tag-row" id="tagRow"></div><div class="stimulus" id="stimulusBox"></div><p class="question-text" id="questionText"></p><div id="answerArea"></div><div class="feedback hidden" id="reviewFeedback" aria-live="polite"></div><div class="actions"><button class="secondary" id="prevBtn" type="button">Previous</button><button class="secondary" id="flagBtn" type="button">Flag question</button><button id="nextBtn" type="button">Next</button><button class="danger" id="finishBtn" type="button">Finish practice</button></div></article><aside class="panel side-card"><h2>Your answers</h2><p class="answer-summary" id="sideSummary">Select an answer, then move to the next question.</p><div id="miniReview"></div></aside></div></section>
-    <section class="screen hidden" id="resultsScreen"><div class="panel"><div class="result-hero"><h2>Practice complete</h2><div class="big-score" id="scoreDisplay">0/80</div><p id="percentDisplay"></p></div><h2>How you did by topic</h2><div class="heat-grid" id="heatMap"></div><div class="feedback" id="overallFeedback"></div><h2 style="margin-top:20px">Questions to review</h2><div class="review-list" id="resultsReviewList"></div><div class="actions"><button id="downloadPdfBtn" type="button">Download results as a PDF</button><button class="secondary" id="reviewBtn" type="button">Review each question</button><button class="secondary" id="retakeBtn" type="button">Choose another practice</button></div><div class="print-only" id="printResults"></div></div></section>
+    <section class="screen" id="startScreen"><div class="exam-cover"><div class="cover-title"><h1>11+ Verbal Reasoning</h1></div><div class="instruction-box"><h2>Before you begin</h2><p>Choose one answer unless the question tells you otherwise. The full mock uses multiple-choice questions only; skills practice also includes matching, multi-select and ordering activities.</p><p>Work carefully. Flag difficult questions and return to them later. There is no penalty for a wrong answer.</p><p class="fine-print"><strong>Important:</strong> this is independent general practice, not an official paper or an exact replica of any school, local authority or test provider. Formats and timings vary by area.</p></div><div class="setup-grid"><label class="field" for="timeAllowance">Timing<select id="timeAllowance"><option value="1">Standard time</option><option value="1.25">25% extra time</option><option value="0">Untimed</option></select></label><label class="field" for="textSize">Text size<select id="textSize"><option value="standard">Standard</option><option value="large">Larger text</option></select></label><label class="check-field" for="reduceMotion"><input id="reduceMotion" type="checkbox" /> Reduce motion and smooth scrolling</label></div><div class="actions"><div class="mode-card"><button id="startBtn" type="button">Start fixed full mock — 80 multiple-choice questions</button><p class="mode-note">Hand-curated, balanced and reproducible. Standard time: 50 minutes.</p></div><div class="mode-card"><button class="secondary" id="sampleBtn" type="button">Start mixed skills practice — 25 questions</button><p class="mode-note">Fresh balanced set with varied digital activities. Standard time: 20 minutes.</p></div><div class="mode-card"><button class="secondary" id="learnBtn" type="button">Start untimed learning practice — 25 questions</button><p class="mode-note">No countdown; review worked guidance after finishing.</p></div></div><div class="save-actions"><button class="secondary hidden" id="resumeBtn" type="button">Resume saved practice</button><button class="secondary hidden" id="clearSaveBtn" type="button">Delete saved practice</button></div><p class="fine-print">Progress is saved only in this browser on this device. Finishing or deleting a practice removes the saved attempt.</p></div></section>
+    <section class="screen hidden" id="examScreen"><div class="topbar"><div class="toprow"><div><strong id="examTitle">Verbal Reasoning</strong> · <span id="paperCode">Paper</span> · <span id="progressText">Question 1 of 80</span> · <span id="answeredText">0 answered</span></div><div class="timer" id="timer" role="timer" aria-label="Time remaining">50:00</div></div><div class="meter" role="progressbar" aria-label="Question progress" aria-valuemin="1" aria-valuemax="80" aria-valuenow="1"><div class="meter-fill" id="progressFill"></div></div><div class="nav-grid" id="questionNav" aria-label="Question navigation"></div></div><div class="question-wrap"><article class="panel question-card" id="questionPanel" tabindex="-1"><h2 class="q-number" id="questionNumber">Question 1</h2><div class="tag-row" id="tagRow"></div><div class="stimulus" id="stimulusBox"></div><p class="question-text" id="questionText"></p><div id="answerArea"></div><div class="feedback hidden" id="reviewFeedback" aria-live="polite"></div><div class="actions"><button class="secondary" id="prevBtn" type="button">Previous</button><button class="secondary" id="flagBtn" type="button">Flag question</button><button id="nextBtn" type="button">Next</button><button class="danger" id="finishBtn" type="button">Finish practice</button></div></article><aside class="panel side-card"><h2>Your answers</h2><p class="answer-summary" id="sideSummary">Select an answer, then move to the next question.</p><div id="miniReview"></div></aside></div></section>
+    <section class="screen hidden" id="resultsScreen"><div class="panel"><div class="result-hero"><h2>Practice complete</h2><div class="big-score" id="scoreDisplay">0/80</div><p id="percentDisplay"></p><p class="raw-score-note">This is raw practice accuracy, not an age-standardised score or an admissions prediction. Different schools and areas use different tests and scoring methods.</p></div><h2>Raw accuracy by topic</h2><div class="heat-grid" id="heatMap"></div><div class="feedback" id="overallFeedback"></div><h2 style="margin-top:20px">Questions to review</h2><div class="review-list" id="resultsReviewList"></div><div class="actions"><button id="downloadPdfBtn" type="button">Download detailed results PDF</button><button class="secondary" id="reviewBtn" type="button">Review each question</button><button class="secondary" id="retakeBtn" type="button">Choose another practice</button></div><div class="print-only" id="printResults"></div></div></section>
   </main>
   <script>
     const TOPICS = {
@@ -119,10 +135,38 @@
       logic: { name: "Logic & Deduction" }
     };
 
+    const BUILD_ID = "VR-3.1.0";
+    const FIXED_MOCK_SEED = "VR-3.0.0-CURATED-MOCK-01";
+    const SAVE_KEY = "eleven-plus-vr-progress-v3-1";
+    const PREFS_KEY = "eleven-plus-vr-preferences-v3";
+    function hashSeed(value) { let h = 2166136261; for (const ch of String(value)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+    function mulberry32(seed) { return function() { let t = seed += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    let randomSource = mulberry32(hashSeed(`${BUILD_ID}-bank-index`));
+    function setRandomSeed(seed) { randomSource = mulberry32(hashSeed(seed)); }
+    function randomValue() { return randomSource(); }
+    function polishText(value) {
+      return String(value ?? "")
+        .replace(/\bA ((?!(?:and|as|or|is|equals)\b)[aeiou][a-z-]*)\b/g, "An $1")
+        .replace(/\ba ((?!(?:and|as|or|is|equals)\b)[aeiou][a-z-]*)\b/g, "an $1")
+        .replace(/([.!?])\s+(follows(?: directly)? from)/g, " $2")
+        .replace(/\s+([,.;:!])/g, "$1")
+        .replace(/([!?])\1+/g, "$1");
+    }
+    function polishQuestion(q) {
+      q.prompt = polishText(q.prompt);
+      q.hint = polishText(q.hint);
+      q.explanation = polishText(q.explanation);
+      return q;
+    }
+    function relationChoices(answer, pool, excluded = []) {
+      const blocked = new Set([answer].concat(excluded).map(key));
+      return makeTextChoices(answer, shuffle(pool).filter(x => !blocked.has(key(x))).slice(0, 4));
+    }
+
     const BANK = [];
     let familyCounter = 0;
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
-    function rint(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function rint(min, max) { return Math.floor(randomValue() * (max - min + 1)) + min; }
     function pick(arr) { return arr[rint(0, arr.length - 1)]; }
     function shuffle(arr) {
       const copy = arr.slice();
@@ -327,9 +371,9 @@
         });
       });
 
-      addFamily("vocab", "Homophones and spelling choices", d => {
+      addFamily("vocab", "Spelling choices in context", d => {
         const item = pick(HOMOPHONES.filter(x => x.d <= d + 1));
-        return qBase("vocab", "Homophones and spelling choices", d, "mc", "Choose the correct word to complete the sentence.", item.a, {
+        return qBase("vocab", "Spelling choices in context", d, "mc", "Choose the correct word to complete the sentence.", item.a, {
           stimulus: `<div class="vr-card">${escapeHtml(item.s)}</div>`,
           choices: makeTextChoices(item.a, item.opts),
           hint: "Say the sentence in your head and check the meaning, not only the sound.",
@@ -695,7 +739,7 @@
           ["door","bell",["river","pencil","cloud"],["river","pencil","cloud"]]
         ]);
         const [first, second, beforeOptions, afterOptions] = item;
-        const firstBlank = Math.random() < 0.5;
+        const firstBlank = randomValue() < 0.5;
         const ans = firstBlank ? first : second;
         const opts = firstBlank ? beforeOptions : afterOptions;
         return qBase("compounds", "Complete the compound word", d, "mc", firstBlank ? `Choose the word that goes before ${second} to make a compound word.` : `Choose the word that goes after ${first} to make a compound word.`, ans, {
@@ -822,7 +866,7 @@
 
       addFamily("codes", "Letter arithmetic", d => {
         const start = rint(1, 26), move = rint(1, 3 + d);
-        const op = Math.random() < .5 ? "+" : "−";
+        const op = randomValue() < .5 ? "+" : "−";
         const ans = op === "+" ? letter(start + move) : letter(start - move);
         const from = letter(start);
         return qBase("codes", "Letter arithmetic", d, "mc", `Using the alphabet, what is ${from} ${op} ${move}?`, ans, {
@@ -994,7 +1038,7 @@
       addFamily("sequences", "Days and months", d => {
         const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
         const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-        const list = Math.random() < .5 ? days : months;
+        const list = randomValue() < .5 ? days : months;
         const maxStep = Math.max(1, Math.floor((list.length - 1) / 4));
         const step = rint(1, Math.min(3, d, maxStep));
         const start = rint(0, list.length - 1 - step*4);
@@ -1132,7 +1176,7 @@
 
       addFamily("wordplay", "Alphabetical order of words", d => {
         const words = shuffle(["apple","angle","animal","anchor","author","autumn","basic","baker","basket","beacon","castle","carpet","carton","cattle"].slice(0, 6 + d*2)).slice(0, 4);
-        const askFirst = Math.random() < .5;
+        const askFirst = randomValue() < .5;
         const sorted = words.slice().sort();
         const ans = askFirst ? sorted[0] : sorted[sorted.length-1];
         return qBase("wordplay", "Alphabetical order of words", d, "mc", `Which word would come ${askFirst ? "first" : "last"} in alphabetical order?`, ans, {
@@ -1234,11 +1278,11 @@
         });
       });
 
-      addFamily("logic", "Following alphabet instructions", d => {
+      addFamily("codes", "Following alphabet instructions", d => {
         const start = letter(rint(3, 23));
         const m1 = rint(1, 4 + d), m2 = rint(1, 3 + Math.floor(d/2));
         const ans = letter(pos(start) + m1 - m2);
-        return qBase("logic", "Following alphabet instructions", d, "mc", `Start at ${start}. Move ${m1} letters forwards, then ${m2} letters backwards. Where do you finish?`, ans, {
+        return qBase("codes", "Following alphabet instructions", d, "mc", `Start at ${start}. Move ${m1} letters forwards, then ${m2} letters backwards. Where do you finish?`, ans, {
           stimulus: svgAlphabet([start, ans]),
           choices: makeLetterChoices(ans),
           hint: "Do the instructions in order.",
@@ -1509,7 +1553,7 @@
         const item = pick(items);
         return qBase("analogies", "Intensity analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to _____.`, item[3], {
           choices: makeTextChoices(item[3], item[4]),
-          hint: "The second word is a stronger version of the first.",
+          hint: "The second word is a stronger form of the first.",
           explanation: `${item[1]} is stronger than ${item[0]}; ${item[3]} is stronger than ${item[2]}.`
         });
       }, 10);
@@ -1549,10 +1593,10 @@
 
       addFamily("classification", "Choose two with the same word part", d => {
         const sets = [
-          { part: "pre-", rule: "begin with a prefix meaning before", correct: ["preview", "preheat"], distractors: ["prevent", "pretty", "press"] },
+          { part: "pre-", rule: "begin with the clearly separable prefix pre- meaning before", correct: ["preview", "preheat"], distractors: ["pretzel", "pretty", "press"] },
           { part: "-less", rule: "end with a suffix meaning without", correct: ["careless", "fearless"], distractors: ["unless", "bless", "lessen"] },
           { part: "re-", rule: "begin with a prefix meaning again", correct: ["rewrite", "rebuild"], distractors: ["ready", "real", "region"] },
-          { part: "sub-", rule: "begin with a prefix meaning under", correct: ["submarine", "subway"], distractors: ["subject", "subtle", "submit"] },
+          { part: "sub-", rule: "begin with the clearly separable prefix sub- meaning under", correct: ["submarine", "subway"], distractors: ["subtle", "supper", "sunset"] },
           { part: "-er", rule: "can name a person who does the action", correct: ["runner", "baker"], distractors: ["river", "never", "under"] }
         ].slice(0, 2 + d);
         const set = pick(sets);
@@ -1883,7 +1927,7 @@
       addFamily("sequences", "Calendar order sequences", d => {
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        const useMonths = Math.random() < 0.5;
+        const useMonths = randomValue() < 0.5;
         const arr = useMonths ? months : days;
         const step = useMonths ? rint(1, Math.min(3, d+1)) : rint(1, 2);
         const start = rint(0, arr.length - 1);
@@ -1968,7 +2012,7 @@
         const group = shuffle(pick(groups));
         const first = group.slice().sort()[0];
         const last = group.slice().sort()[group.length - 1];
-        const askFirst = Math.random() < 0.55;
+        const askFirst = randomValue() < 0.55;
         const ans = askFirst ? first : last;
         return qBase("wordplay", "Alphabetical order selection", d, "mc", `Which word would come ${askFirst ? "first" : "last"} in a dictionary?`, ans, {
           stimulus: wordBank(group),
@@ -2084,7 +2128,6 @@
     function extendBankWithAdditionalVR500() {
       const mk = (answer, distractors, min = 4) => makeTextChoices(answer, distractors, min);
       const coord = (x, y) => `(${x}, ${y})`;
-      const yesNo = ans => ["yes", "no", "cannot tell", "only sometimes"].map(v => ({ value: v, label: v }));
       const withAnswerFirst = (answer, distractors) => makeTextChoices(answer, distractors);
       const svgPathGrid = (start, moves, end) => {
         const w = 330, h = 330, left = 44, bottom = 286, step = 42;
@@ -2258,7 +2301,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional animal analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], "adult"]),
+          choices: relationChoices(item[3], ["puppy","kitten","calf","foal","lamb","kid","duckling","cygnet","cub","tadpole","caterpillar","fawn","eaglet","joey","gosling"], item.slice(0,3)),
           hint: "The relationship is adult animal to young animal.",
           explanation: `A young ${item[0]} is a ${item[1]}; a young ${item[2]} is a ${item[3]}.`
         });
@@ -2272,7 +2315,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional worker and tool analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], "book"]),
+          choices: relationChoices(item[3], ["pen","brush","pan","trowel","saw","needle","stethoscope","easel","cockpit","bridge","camera","telescope","spanner","bow","scalpel"], item.slice(0,3)),
           hint: "Think about what the person uses or where they work.",
           explanation: `A ${item[0]} uses a ${item[1]}; a ${item[2]} uses a ${item[3]}.`
         });
@@ -2286,7 +2329,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional object function analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], "decorate"]),
+          choices: relationChoices(item[3], ["cut","stir","unlock","shine","shelter","warm","measure","weigh","guide","schedule","hold","strain","measure temperature","show direction","magnify","separate"], item.slice(0,3)),
           hint: "The first word is an object and the second describes what it is used for.",
           explanation: `A ${item[0]} is used to ${item[1]}; a ${item[2]} is used to ${item[3]}.`
         });
@@ -2300,7 +2343,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional part-whole analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], "piece"]),
+          choices: relationChoices(item[3], ["book","flower","bicycle","shirt","tree","door","novel","poem","melody","wall","recipe","word","essay","play","world","country"], item.slice(0,3)),
           hint: "The first item is part of the second item.",
           explanation: `A ${item[0]} is part of a ${item[1]}; a ${item[2]} is part of a ${item[3]}.`
         });
@@ -2314,7 +2357,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional cause-effect analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], "nothing"]),
+          choices: relationChoices(item[3], ["puddle","wave","smoke","shiver","improvement","knowledge","flame","plant","heat","fall","correction","answer","fitness","confidence","vapour","ice"], item.slice(0,3)),
           hint: "Think about what the first thing can produce or lead to.",
           explanation: `${item[0]} can cause ${item[1]}; ${item[2]} can lead to ${item[3]}.`
         });
@@ -2329,7 +2372,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional degree analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], "ordinary"]),
+          choices: relationChoices(item[3], ["hot","cold","huge","tiny","delighted","miserable","exhausted","starving","astonished","furious","soaked","dazzling","alarmed","excellent","doubtful","obvious"], item.slice(0,3)),
           hint: "The second word is a stronger or related degree of the first.",
           explanation: `${item[1]} is a stronger form of ${item[0]}; ${item[3]} matches ${item[2]} in the same way.`
         });
@@ -2343,7 +2386,7 @@
         ].filter(x => x[4] <= d + 1);
         const item = pick(items);
         return qBase("analogies", "Additional grammar analogies", d, "mc", `${item[0]} is to ${item[1]} as ${item[2]} is to …`, item[3], {
-          choices: mk(item[3], [item[0], item[1], item[2], item[2] + "s"]),
+          choices: relationChoices(item[3], ["walked","jumped","playing","reading","happier","taller","ran","swam","writer","teacher","beautiful","dangerous","decision","description","creative","instructive"], item.slice(0,3)),
           hint: "Look at how the first word changes form, then apply the same type of change.",
           explanation: `${item[0]} changes to ${item[1]}; ${item[2]} changes to ${item[3]}.`
         });
@@ -2686,7 +2729,7 @@
       addFamily("sequences", "Additional calendar order sequences", d => {
         const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-        const useMonths = Math.random() < 0.55;
+        const useMonths = randomValue() < 0.55;
         const list = useMonths ? months : days;
         const maxStep = useMonths ? Math.min(2, Math.floor((list.length - 1) / 4)) : 1;
         const step = rint(1, maxStep);
@@ -3063,7 +3106,7 @@
         const target = pick(levels.filter(p => p[0] !== pair[0]));
         return qBase("analogies", "Final intensity analogies", d, "mc", `${pair[0]} is to ${pair[1]} as ${target[0]} is to _____.`, target[1], {
           choices: mk(target[1], shuffle(levels.map(p => p[1]).filter(v => v !== target[1])), 4),
-          hint: "The second word is a stronger version of the first word.",
+          hint: "The second word is a stronger form of the first word.",
           explanation: `${target[1]} is a stronger form of ${target[0]}.`
         });
       }, 10);
@@ -3293,7 +3336,7 @@
 
       addFamily("codes", "Final alphabet positions", d => {
         const ch = letter(rint(1, 26));
-        const askLetter = Math.random() < 0.5;
+        const askLetter = randomValue() < 0.5;
         if (askLetter) {
           const n = rint(1, 26);
           return qBase("codes", "Final alphabet positions", d, "mc", `If A = 1, B = 2, C = 3 and so on, which letter is ${n}?`, letter(n), {
@@ -3441,7 +3484,7 @@
       addFamily("sequences", "Final alphabetic ordering", d => {
         const words = shuffle(["apple", "apricot", "banana", "berry", "carrot", "cereal", "cherry", "date", "grape", "melon", "orange", "peach"]).slice(0, 5);
         const ordered = words.slice().sort((a,b) => a.localeCompare(b));
-        const askFirst = Math.random() < 0.5;
+        const askFirst = randomValue() < 0.5;
         const answer = askFirst ? ordered[0] : ordered[ordered.length - 1];
         return qBase("sequences", "Final alphabetic ordering", d, "mc", `Which word would come ${askFirst ? "first" : "last"} in dictionary order?`, answer, {
           stimulus: wordBank(words),
@@ -3566,11 +3609,11 @@
         });
       }, 10);
 
-      addFamily("logic", "Final instruction following", d => {
+      addFamily("codes", "Final instruction following", d => {
         const start = letter(rint(4, 20));
         const steps = [rint(1, 3+d), -rint(1, 3), rint(1, 2+d)];
         const answer = letter(pos(start) + steps.reduce((a,b) => a + b, 0));
-        return qBase("logic", "Final instruction following", d, "mc", `Start at ${start}. Move forward ${steps[0]}, back ${Math.abs(steps[1])}, then forward ${steps[2]}. Where do you finish?`, answer, {
+        return qBase("codes", "Final instruction following", d, "mc", `Start at ${start}. Move forward ${steps[0]}, back ${Math.abs(steps[1])}, then forward ${steps[2]}. Where do you finish?`, answer, {
           stimulus: svgAlphabet([start, answer]),
           choices: makeLetterChoices(answer),
           hint: "Use alphabet positions and apply each instruction in order.",
@@ -3591,17 +3634,17 @@
 
       addFamily("logic", "Final coded conclusion", d => {
         const rules = [
-          ["All robins are birds. All birds have wings.", "Robins have wings.", "yes"],
-          ["All squares are rectangles. Some rectangles are blue.", "All squares are blue.", "cannot tell"],
-          ["No cats are fish. Milo is a cat.", "Milo is a fish.", "no"],
-          ["All roses are flowers. Some flowers are red.", "All roses are red.", "cannot tell"],
-          ["Every member of the chess club is in Year 6. Priya is in the chess club.", "Priya is in Year 6.", "yes"]
+          {facts:"All robins are birds. All birds have wings.", conclusion:"All robins have wings.", answer:"follows", why:"Robins are birds, and every bird has wings, so every robin must have wings."},
+          {facts:"All squares are rectangles. Some rectangles are blue.", conclusion:"All squares are blue.", answer:"does not follow", why:"Only some rectangles are known to be blue. Nothing says that those blue rectangles are squares."},
+          {facts:"No cats are fish. Milo is a cat.", conclusion:"Milo is a fish.", answer:"does not follow", why:"Milo is a cat and no cat is a fish, so the conclusion contradicts the facts."},
+          {facts:"All roses are flowers. Some flowers are red.", conclusion:"All roses are red.", answer:"does not follow", why:"The red flowers are not identified as roses, so the conclusion is not guaranteed."},
+          {facts:"Every member of the chess club is in Year 6. Priya is in the chess club.", conclusion:"Priya is in Year 6.", answer:"follows", why:"Priya is a chess-club member, and every chess-club member is in Year 6."}
         ].slice(0, 3 + d);
         const item = pick(rules);
-        return qBase("logic", "Final coded conclusion", d, "mc", `${item[0]} Can we be certain that: '${item[1]}'?`, item[2], {
-          choices: ["yes", "no", "cannot tell", "only sometimes"].map(v => ({ value: v, label: v })),
-          hint: "Use only the information given. Do not add extra facts.",
-          explanation: `The correct conclusion is '${item[2]}' because the statement must follow from the clues, not from a guess.`
+        return qBase("logic", "Conclusions from statements", d, "mc", `${item.facts} Does this conclusion logically follow: '${item.conclusion}'?`, item.answer, {
+          choices: ["follows", "does not follow"].map(v => ({ value: v, label: v })),
+          hint: "Choose 'follows' only when the conclusion must be true from the given facts.",
+          explanation: item.why
         });
       }, 10);
     }
@@ -4092,7 +4135,7 @@
 
       addFamily("codes", "Letter-number code", d => {
         const ch = letter(rint(2, 24));
-        const askNumber = Math.random() < 0.5;
+        const askNumber = randomValue() < 0.5;
         if (askNumber) {
           return qBase("codes", "Letter-number code", d, "mc", `If A=1, B=2, C=3, what number is ${ch}?`, String(pos(ch)), {
             stimulus: svgAlphabet([ch]),
@@ -4158,7 +4201,7 @@
           stimulus: sequenceStrip([...seq, "?"]),
           choices: makeTextChoices(answer, [`${letter(start+4*step+1)}${letter(start+4*step+2)}`, `${letter(start+3*step)}${letter(start+3*step+1)}`, `${letter(start+4*step)}${letter(start+4*step+2)}`, `${letter(start+5*step)}${letter(start+5*step+1)}`]),
           hint: "Track the first letters and second letters separately.",
-          explanation: `The first letter moves on by ${step}; the second follows the same pair rule, so the next pair is ${answer}.`
+          explanation: `First letters: ${seq.map(pair=>pair[0]).join(", ")} move forward ${step} place${step===1?'':'s'} each time. Second letters: ${seq.map(pair=>pair[1]).join(", ")} do the same. The next pair is ${answer}.`
         });
       }, 10);
 
@@ -4173,7 +4216,7 @@
       }, 10);
 
       addFamily("sequences", "Days and months sequence", d => {
-        const useMonths = Math.random() < 0.5;
+        const useMonths = randomValue() < 0.5;
         const list = useMonths ? months : days;
         const step = rint(1, 2 + Math.min(d, 2));
         const start = rint(0, list.length - 1);
@@ -4280,27 +4323,27 @@
 
       addFamily("logic", "Conclusion from statements", d => {
         const rules = [
-          ["All robins are birds. All birds have wings.","Robins have wings.","yes"],
-          ["All squares are rectangles. Some rectangles are blue.","All squares are blue.","cannot tell"],
-          ["No cats are fish. Milo is a cat.","Milo is a fish.","no"],
-          ["All roses are flowers. Some flowers are red.","All roses are red.","cannot tell"],
-          ["Every chess-club member is in Year 6. Priya is in the chess club.","Priya is in Year 6.","yes"],
-          ["No pencils are pens. This object is a pencil.","This object is a pen.","no"]
+          {facts:"All robins are birds. All birds have wings.",conclusion:"All robins have wings.",answer:"follows",why:"Every robin is a bird, and every bird has wings."},
+          {facts:"All squares are rectangles. Some rectangles are blue.",conclusion:"All squares are blue.",answer:"does not follow",why:"The blue rectangles are not identified as squares."},
+          {facts:"No cats are fish. Milo is a cat.",conclusion:"Milo is a fish.",answer:"does not follow",why:"The conclusion contradicts the fact that no cat is a fish."},
+          {facts:"All roses are flowers. Some flowers are red.",conclusion:"All roses are red.",answer:"does not follow",why:"The red flowers are not identified as roses."},
+          {facts:"Every chess-club member is in Year 6. Priya is in the chess club.",conclusion:"Priya is in Year 6.",answer:"follows",why:"Priya is a chess-club member, and every member is in Year 6."},
+          {facts:"No pencils are pens. This object is a pencil.",conclusion:"This object is a pen.",answer:"does not follow",why:"The object is a pencil, and no pencil is a pen."}
         ].slice(0, 3 + d);
         const item = pick(rules);
-        return qBase("logic", "Conclusion from statements", d, "mc", `${item[0]} Can we be certain that: '${item[1]}'?`, item[2], {
-          choices: ["yes","no","cannot tell","only sometimes"].map(v => ({value:v, label:v})),
-          hint: "Use only the statements given, not outside knowledge.",
-          explanation: `The answer is '${item[2]}' because the conclusion must follow from the clues.`
+        return qBase("logic", "Conclusion from statements", d, "mc", `${item.facts} Does this conclusion logically follow: '${item.conclusion}'?`, item.answer, {
+          choices: ["follows","does not follow"].map(v => ({value:v, label:v})),
+          hint: "Choose 'follows' only when the conclusion must be true from the given facts.",
+          explanation: item.why
         });
       }, 10);
 
-      addFamily("logic", "Direction instructions", d => {
+      addFamily("codes", "Direction instructions", d => {
         const start = rint(3, 22);
         const steps = [rint(-3,3)||2, rint(-4,4)||-2, rint(-2,2)||1].map(x => Math.max(-5, Math.min(5, x)));
         const finishPos = start + steps.reduce((a,b)=>a+b,0);
         const answer = letter(finishPos);
-        return qBase("logic", "Direction instructions", d, "mc", `Start on letter ${letter(start)}. Move ${steps.map(s => `${Math.abs(s)} ${s>=0?"forward":"back"}`).join(", then ")}. Where do you finish?`, answer, {
+        return qBase("codes", "Direction instructions", d, "mc", `Start on letter ${letter(start)}. Move ${steps.map(s => `${Math.abs(s)} ${s>=0?"forward":"back"}`).join(", then ")}. Where do you finish?`, answer, {
           stimulus: svgAlphabet([letter(start), answer]),
           choices: makeTextChoices(answer, [letter(finishPos+1), letter(finishPos-1), letter(start), letter(start-steps[0])]),
           hint: "Carry out the moves in order on the alphabet strip.",
@@ -4670,7 +4713,7 @@
         "Word-pair relationships", "Material and product", "Odd compound out",
         "Hidden word across words", "Add one letter", "Odd one out by word type",
         "Word class recognition", "Final grammatical odd one out", "Order an anagram",
-        "Order the clues"
+        "Order the clues", "Match people to clues"
       ]);
       const kept = BANK.filter(entry => !blockedTitles.has(entry.title));
       BANK.splice(0, BANK.length, ...kept);
@@ -4693,77 +4736,594 @@
     extendBankWithVerifiedVR50Supplement();
     sanitiseVerbalReasoningBankForCleanExam();
 
-    const EXAM_SPEC = [
-      {topic:'vocab',count:10,section:'Vocabulary'}, {topic:'analogies',count:10,section:'Analogies & Relationships'}, {topic:'classification',count:10,section:'Odd One Out & Categories'}, {topic:'compounds',count:8,section:'Compound Words & Word Pairs'}, {topic:'codes',count:12,section:'Letter Codes'}, {topic:'sequences',count:10,section:'Letter & Number Sequences'}, {topic:'wordplay',count:10,section:'Hidden Words & Anagrams'}, {topic:'logic',count:10,section:'Logic & Deduction'}
+    const EXAM_SPEC_V2 = [
+      {topic:'vocab',count:10,section:'Vocabulary'},
+      {topic:'analogies',count:10,section:'Analogies & Relationships'},
+      {topic:'classification',count:10,section:'Odd One Out & Categories'},
+      {topic:'compounds',count:8,section:'Compound Words & Word Pairs'},
+      {topic:'codes',count:12,section:'Letter Codes'},
+      {topic:'sequences',count:10,section:'Letter & Number Sequences'},
+      {topic:'wordplay',count:10,section:'Hidden Words & Anagrams'},
+      {topic:'logic',count:10,section:'Logic & Deduction'}
     ];
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const examEls = {
-      startScreen:document.getElementById('startScreen'), examScreen:document.getElementById('examScreen'), resultsScreen:document.getElementById('resultsScreen'), startBtn:document.getElementById('startBtn'), sampleBtn:document.getElementById('sampleBtn'), examTitle:document.getElementById('examTitle'), progressText:document.getElementById('progressText'), answeredText:document.getElementById('answeredText'), timer:document.getElementById('timer'), meter:document.querySelector('.meter'), progressFill:document.getElementById('progressFill'), questionNav:document.getElementById('questionNav'), questionPanel:document.getElementById('questionPanel'), questionNumber:document.getElementById('questionNumber'), tagRow:document.getElementById('tagRow'), stimulusBox:document.getElementById('stimulusBox'), questionText:document.getElementById('questionText'), answerArea:document.getElementById('answerArea'), reviewFeedback:document.getElementById('reviewFeedback'), prevBtn:document.getElementById('prevBtn'), flagBtn:document.getElementById('flagBtn'), nextBtn:document.getElementById('nextBtn'), finishBtn:document.getElementById('finishBtn'), sideSummary:document.getElementById('sideSummary'), miniReview:document.getElementById('miniReview'), scoreDisplay:document.getElementById('scoreDisplay'), percentDisplay:document.getElementById('percentDisplay'), heatMap:document.getElementById('heatMap'), overallFeedback:document.getElementById('overallFeedback'), resultsReviewList:document.getElementById('resultsReviewList'), downloadPdfBtn:document.getElementById('downloadPdfBtn'), reviewBtn:document.getElementById('reviewBtn'), retakeBtn:document.getElementById('retakeBtn'), printResults:document.getElementById('printResults')
+    const SHORT_SPEC_V2 = [
+      {topic:'vocab',count:4},{topic:'analogies',count:3},{topic:'classification',count:3},{topic:'compounds',count:3},
+      {topic:'codes',count:4},{topic:'sequences',count:3},{topic:'wordplay',count:3},{topic:'logic',count:2}
+    ];
+    const choiceLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const examElsV2 = {
+      startScreen:document.getElementById('startScreen'), examScreen:document.getElementById('examScreen'), resultsScreen:document.getElementById('resultsScreen'),
+      startBtn:document.getElementById('startBtn'), sampleBtn:document.getElementById('sampleBtn'), learnBtn:document.getElementById('learnBtn'),
+      resumeBtn:document.getElementById('resumeBtn'), clearSaveBtn:document.getElementById('clearSaveBtn'),
+      timeAllowance:document.getElementById('timeAllowance'), textSize:document.getElementById('textSize'), reduceMotion:document.getElementById('reduceMotion'),
+      examTitle:document.getElementById('examTitle'), paperCode:document.getElementById('paperCode'),
+      progressText:document.getElementById('progressText'), answeredText:document.getElementById('answeredText'), timer:document.getElementById('timer'),
+      meter:document.querySelector('.meter'), progressFill:document.getElementById('progressFill'), questionNav:document.getElementById('questionNav'),
+      questionPanel:document.getElementById('questionPanel'), questionNumber:document.getElementById('questionNumber'), tagRow:document.getElementById('tagRow'),
+      stimulusBox:document.getElementById('stimulusBox'), questionText:document.getElementById('questionText'), answerArea:document.getElementById('answerArea'),
+      reviewFeedback:document.getElementById('reviewFeedback'), prevBtn:document.getElementById('prevBtn'), flagBtn:document.getElementById('flagBtn'),
+      nextBtn:document.getElementById('nextBtn'), finishBtn:document.getElementById('finishBtn'), sideSummary:document.getElementById('sideSummary'),
+      miniReview:document.getElementById('miniReview'), scoreDisplay:document.getElementById('scoreDisplay'), percentDisplay:document.getElementById('percentDisplay'),
+      heatMap:document.getElementById('heatMap'), overallFeedback:document.getElementById('overallFeedback'), resultsReviewList:document.getElementById('resultsReviewList'),
+      downloadPdfBtn:document.getElementById('downloadPdfBtn'), reviewBtn:document.getElementById('reviewBtn'), retakeBtn:document.getElementById('retakeBtn'),
+      printResults:document.getElementById('printResults')
     };
-    const exam = {questions:[], answers:{}, flagged:new Set(), index:0, results:[], score:0, finished:false, review:false, timerId:null, endsAt:0, totalSeconds:0};
-    function sectionFor(topic){return EXAM_SPEC.find(s=>s.topic===topic)?.section || TOPICS[topic]?.name || 'Verbal Reasoning';}
-    function cloneAnswer(v){return Array.isArray(v)?v.slice():v&&typeof v==='object'?Object.assign({},v):v;}
-    function isAnswered(q){const v=exam.answers[q.uid]; if(v===undefined||v===null)return false; if(q.kind==='multi')return Array.isArray(v)&&v.length===(q.selectCount||(Array.isArray(q.answer)?q.answer.length:0)); if(q.kind==='order')return Array.isArray(v)&&v.length===(Array.isArray(q.answer)?q.answer.length:0); if(q.kind==='match')return v&&typeof v==='object'&&Object.keys(q.answer||{}).every(k=>String(v[k]||'').length>0); return String(v).length>0;}
-    function answerLabel(q,value=q.answer){return fmtAnswer(value);}
-    function displayValue(v){return fmtAnswer(v===undefined?'No answer selected':v);}
-    function correctForExam(q,value){ if(q.kind==='multi'){const a=(q.answer||[]).map(key).sort().join('|'); const b=Array.isArray(value)?value.map(key).sort().join('|'):''; return a===b;} if(q.kind==='order'){if(!Array.isArray(value)||value.length!==q.answer.length)return false; return value.map(key).join('|')===q.answer.map(key).join('|');} if(q.kind==='match'){if(!value||typeof value!=='object')return false; return Object.keys(q.answer).every(k=>key(value[k]||'')===key(q.answer[k]));} return key(value||'')===key(q.answer||''); }
-    function entryKind(entry){try{return entry.gen(entry.difficulty||3).kind||'mc';}catch(e){return 'mc';}}
-    const ENTRY_KIND = new Map(BANK.map(e=>[e.id, entryKind(e)]));
-    function studentTitle(title){const cleaned=String(title||'Verbal reasoning').replace(/^(?:Further|Additional|Final|Exam|Verified|Supplement)\s+/i,'').replace(/\s+/g,' ').trim(); return cleaned.charAt(0).toUpperCase()+cleaned.slice(1);}
-    function instantiate(entry,number){const q=entry.gen(entry.difficulty||((number-1)%5)+1); q.uid=`${entry.id}-${number}-${Math.random().toString(36).slice(2,8)}`; q.entryId=entry.id; q.number=number; q.section=sectionFor(q.topic); q.title=studentTitle(q.title||entry.title); q.kind=q.kind||'mc'; if(q.kind==='mc'&&(!q.choices||!q.choices.length))q.choices=makeTextChoices(q.answer,[]); if(q.kind==='multi')q.selectCount=q.selectCount||(Array.isArray(q.answer)?q.answer.length:2); if(q.kind==='match')q.options=q.options||unique(q.pairs.map(p=>p.right)); return q;}
-    function pickEntriesByTopic(topic,count,used){let pool=shuffle(BANK.filter(e=>e.topic===topic&&!used.has(e.id))); if(pool.length<count)pool=pool.concat(shuffle(BANK.filter(e=>e.topic===topic))); const out=[]; for(const e of pool){if(out.length>=count)break; out.push(e); used.add(e.id);} return out;}
-    function normaliseQuestionPart(value){return String(value??'').replace(/<[^>]*>/g,' ').replace(/&(?:[a-z]+|#\d+);/gi,' ').replace(/\s+/g,' ').trim().toLowerCase();}
-    function questionSignature(q){let interaction=''; if(q.kind==='match')interaction=`${(q.pairs||[]).map(p=>p.left).join('|')}|${(q.options||[]).slice().sort().join('|')}`; else if(q.kind==='order')interaction=(q.tiles||[]).slice().sort().join('|'); else interaction=(q.choices||[]).map(c=>c.label).slice().sort().join('|'); return [q.prompt,q.stimulus,interaction].map(normaliseQuestionPart).join(' || ');}
-    function questionIsSuitable(q){if(q.kind!=='mc')return true; const generic=new Set(['cannot tell','none of these','both are possible','all of these','same meaning','opposite meaning','both','neither','same rule','different rule']); return (q.choices||[]).every(c=>key(c.value)===key(q.answer)||!generic.has(key(c.value)));}
-    function instantiateWithoutRepeats(entries){const signatures=new Set(), reservedIds=new Set(entries.map(e=>e.id)); return entries.map((original,index)=>{let candidate=original; const wantedKind=ENTRY_KIND.get(original.id), alternatives=shuffle(BANK.filter(e=>e.topic===original.topic&&ENTRY_KIND.get(e.id)===wantedKind&&!reservedIds.has(e.id))); for(let attempt=0;attempt<500;attempt++){if(attempt>0&&attempt%3===0&&alternatives.length){candidate=alternatives.pop(); reservedIds.add(candidate.id);} const q=instantiate(candidate,index+1); if(!questionIsSuitable(q))continue; const signature=questionSignature(q); if(!signatures.has(signature)){signatures.add(signature); return q;}} throw new Error(`A unique ${original.topic} ${wantedKind} question could not be created from ${original.title}.`);});}
-    function createQuestionSet(full=true){const used=new Set(); let entries=[]; if(full){EXAM_SPEC.forEach(spec=>entries.push(...pickEntriesByTopic(spec.topic,spec.count,used)));} else {([{topic:'vocab',count:4},{topic:'analogies',count:3},{topic:'classification',count:3},{topic:'compounds',count:3},{topic:'codes',count:4},{topic:'sequences',count:3},{topic:'wordplay',count:3},{topic:'logic',count:2}]).forEach(spec=>entries.push(...pickEntriesByTopic(spec.topic,spec.count,used)));} function ensureKind(kind,target){let have=entries.filter(e=>ENTRY_KIND.get(e.id)===kind).length; if(have>=target)return; const candidates=shuffle(BANK.filter(e=>ENTRY_KIND.get(e.id)===kind&&!used.has(e.id))); for(const cand of candidates){if(have>=target)break; const idx=entries.findIndex(e=>e.topic===cand.topic&&ENTRY_KIND.get(e.id)==='mc'); if(idx>=0){used.delete(entries[idx].id); entries[idx]=cand; used.add(cand.id); have++;}}} ensureKind('multi',full?6:2); ensureKind('match',full?4:1); ensureKind('order',full?4:1); entries=shuffle(entries); return instantiateWithoutRepeats(entries);}
-    function startExam(full=true){clearInterval(exam.timerId); exam.questions=createQuestionSet(full); exam.answers={}; exam.flagged=new Set(); exam.index=0; exam.results=[]; exam.score=0; exam.finished=false; exam.review=false; exam.totalSeconds=full?3000:1200; exam.endsAt=Date.now()+exam.totalSeconds*1000; examEls.examTitle.textContent=full?'Full practice':'Short practice'; examEls.startScreen.classList.add('hidden'); examEls.resultsScreen.classList.add('hidden'); examEls.examScreen.classList.remove('hidden'); examEls.finishBtn.classList.remove('hidden'); examEls.finishBtn.textContent='Finish practice'; examEls.flagBtn.textContent='Flag question'; examEls.reviewFeedback.classList.add('hidden'); examEls.prevBtn.disabled=false; tickTimer(); exam.timerId=setInterval(tickTimer,1000); renderExamQuestion(); window.scrollTo({top:0,behavior:'smooth'});}
-    function tickTimer(){const remain=Math.max(0,Math.ceil((exam.endsAt-Date.now())/1000)); const m=Math.floor(remain/60), s=remain%60; examEls.timer.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; if(remain<=0&&!exam.finished&&exam.questions.length)finishExam(true);}
-    function currentQ(){return exam.questions[exam.index];}
-    function renderTop(){const total=exam.questions.length, answered=exam.questions.filter(isAnswered).length; examEls.progressText.textContent=`${exam.review?'Review':'Question'} ${exam.index+1} of ${total}`; examEls.answeredText.textContent=`${answered} answered`; examEls.progressFill.style.width=`${((exam.index+1)/total)*100}%`; examEls.meter.setAttribute('aria-valuemax',String(total)); examEls.meter.setAttribute('aria-valuenow',String(exam.index+1)); examEls.questionNav.innerHTML=exam.questions.map((q,i)=>{const states=[isAnswered(q)?'answered':'not answered',exam.flagged.has(q.uid)?'flagged':''].filter(Boolean).join(', '); return `<button type="button" class="nav-btn ${i===exam.index?'current':''} ${isAnswered(q)?'answered':''} ${exam.flagged.has(q.uid)?'flagged':''}" data-index="${i}" aria-label="Question ${i+1}: ${states}" ${i===exam.index?'aria-current="step"':''}>${i+1}</button>`;}).join(''); examEls.questionNav.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{exam.index=Number(btn.dataset.index); exam.review?renderReviewQuestion():renderExamQuestion();})); examEls.miniReview.innerHTML=exam.questions.slice(Math.max(0,exam.index-3),Math.min(total,exam.index+4)).map((q,i)=>{const real=Math.max(0,exam.index-3)+i; return `<div class="mini-row"><span>Q${real+1}</span><span>${isAnswered(q)?'answered':'not answered'}${exam.flagged.has(q.uid)?' · flagged':''}</span></div>`;}).join('');}
-    function renderExamQuestion(){if(!exam.questions.length)return; const q=currentQ(); renderTop(); examEls.questionNumber.textContent=`Question ${exam.index+1}`; examEls.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">1 mark</span>`; examEls.stimulusBox.innerHTML=q.stimulus||''; examEls.questionText.innerHTML=escapeHtml(q.prompt); examEls.reviewFeedback.classList.add('hidden'); examEls.flagBtn.textContent=exam.flagged.has(q.uid)?'Remove flag':'Flag question'; examEls.prevBtn.disabled=exam.index===0; examEls.nextBtn.textContent=exam.index===exam.questions.length-1?'Finish practice':'Next'; renderAnswerInput(q); updateSide(); examEls.questionPanel.focus({preventScroll:true});}
-    function updateSide(){const q=currentQ(), ans=exam.answers[q.uid]; examEls.sideSummary.innerHTML=`<strong>${escapeHtml(q.section)}</strong><br>${escapeHtml(q.title)}<br><br><strong>Your answer:</strong><br>${escapeHtml(isAnswered(q)?displayValue(ans):'No answer selected')}`;}
-    function setAnswer(q,value){exam.answers[q.uid]=cloneAnswer(value); renderAnswerInput(q); renderTop(); updateSide();}
-    function renderAnswerInput(q){if(q.kind==='multi')return renderMultiInput(q); if(q.kind==='order')return renderOrderInput(q); if(q.kind==='match')return renderMatchInput(q); return renderMCInput(q);}
-    function renderMCInput(q){const selected=exam.answers[q.uid]; examEls.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((c,i)=>{const chosen=key(selected||'')===key(c.value); return `<button type="button" class="choice-btn ${chosen?'selected':''}" data-value="${escapeHtml(c.value)}" aria-pressed="${chosen}"><span class="choice-letter">${letters[i]}</span><span>${escapeHtml(c.label)}</span></button>`;}).join('')}</div>`; examEls.answerArea.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>setAnswer(q,btn.dataset.value)));}
-    function renderMultiInput(q){const selected=new Set(Array.isArray(exam.answers[q.uid])?exam.answers[q.uid].map(String):[]), limit=q.selectCount||q.answer.length; examEls.answerArea.innerHTML=`<div class="multi-note">Select ${limit} answer${limit===1?'':'s'}.</div><div class="multi-grid">${q.choices.map(c=>{const chosen=selected.has(String(c.value)); return `<button type="button" class="multi-btn ${chosen?'selected':''}" data-value="${escapeHtml(c.value)}" aria-pressed="${chosen}">${escapeHtml(c.label)}</button>`;}).join('')}</div>`; examEls.answerArea.querySelectorAll('.multi-btn').forEach(btn=>btn.addEventListener('click',()=>{const cur=new Set(Array.isArray(exam.answers[q.uid])?exam.answers[q.uid]:[]), v=btn.dataset.value; if(cur.has(v))cur.delete(v); else if(cur.size<limit)cur.add(v); setAnswer(q,Array.from(cur));}));}
-    function renderOrderInput(q){const selected=Array.isArray(exam.answers[q.uid])?exam.answers[q.uid].slice():[]; const selectedKeys=selected.map(key), remaining=q.tiles.map(String).filter(t=>{const i=selectedKeys.indexOf(key(t)); if(i<0)return true; selectedKeys.splice(i,1); return false;}); examEls.answerArea.innerHTML=`<div class="order-area"><div><strong>Your order:</strong></div><div class="slot-row">${q.answer.map((_,i)=>`<button type="button" class="answer-slot" data-slot="${i}" aria-label="Position ${i+1}: ${escapeHtml(selected[i]||'empty')}">${escapeHtml(selected[i]||'')}</button>`).join('')}</div><div><strong>Choose from:</strong></div><div class="tile-row">${remaining.map(t=>`<button type="button" class="tile-btn" data-tile="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('')}</div><button type="button" class="secondary" id="clearOrderBtn">Clear order</button></div>`; examEls.answerArea.querySelectorAll('.tile-btn').forEach(btn=>btn.addEventListener('click',()=>{if(selected.length>=q.answer.length)return; selected.push(btn.dataset.tile); setAnswer(q,selected);})); examEls.answerArea.querySelectorAll('.answer-slot').forEach(btn=>btn.addEventListener('click',()=>{const idx=Number(btn.dataset.slot); if(selected[idx]){selected.splice(idx,1); setAnswer(q,selected);}})); document.getElementById('clearOrderBtn').addEventListener('click',()=>setAnswer(q,[]));}
-    function renderMatchInput(q){const selected=Object.assign({},exam.answers[q.uid]||{}), opts=q.options||unique(q.pairs.map(p=>p.right)); examEls.answerArea.innerHTML=`<div class="match-area">${q.pairs.map((p,i)=>`<div class="match-row"><label class="match-term" for="match-${i}">${escapeHtml(p.left)}</label><select id="match-${i}" data-left="${escapeHtml(p.left)}"><option value="">Choose…</option>${opts.map(o=>`<option value="${escapeHtml(o)}" ${key(selected[p.left]||'')===key(o)?'selected':''}>${escapeHtml(o)}</option>`).join('')}</select></div>`).join('')}</div>`; examEls.answerArea.querySelectorAll('select').forEach(sel=>sel.addEventListener('change',()=>{selected[sel.dataset.left]=sel.value; setAnswer(q,selected);}));}
-    function go(delta){exam.index=clamp(exam.index+delta,0,exam.questions.length-1); renderExamQuestion();}
-    function finishExam(timedOut=false){if(exam.finished)return; if(!timedOut){const blank=exam.questions.length-exam.questions.filter(isAnswered).length; if(blank>0&&!confirm(`You have ${blank} unanswered question${blank===1?'':'s'}. Finish the practice now?`))return;} clearInterval(exam.timerId); exam.finished=true; exam.results=exam.questions.map(q=>{const user=exam.answers[q.uid]; const correct=correctForExam(q,user); return {q,user,correct};}); exam.score=exam.results.filter(r=>r.correct).length; showResults(timedOut);}
-    function topicFeedback(section,pct){if(pct>=75)return 'Strong work. Keep practising under time pressure so your accuracy stays high.'; if(pct>=50)return 'Review the questions you missed and practise this type again.'; return 'Look at the worked answers, then try a short practice on this topic.';}
-    function feedbackForReview(q,r){const base=q.explanation||'Look again at the relationship or rule in the question.'; if(r.correct)return base; const noAnswer=r.user===undefined||r.user===null||(Array.isArray(r.user)&&r.user.length===0)||(typeof r.user==='object'&&!Array.isArray(r.user)&&Object.values(r.user).every(v=>!v)); if(noAnswer)return `No answer was selected. ${base}`; return `Your answer does not fit the required rule or relationship. ${base}`;}
-    function showResults(timedOut=false){examEls.examScreen.classList.add('hidden'); examEls.resultsScreen.classList.remove('hidden'); const pct=Math.round(exam.score/exam.questions.length*100); examEls.scoreDisplay.textContent=`${exam.score}/${exam.questions.length}`; examEls.percentDisplay.textContent=`${pct}%${timedOut?' · Time expired':''}`; const sections={}; exam.results.forEach(r=>{const sec=r.q.section; if(!sections[sec])sections[sec]={total:0,correct:0,skills:{}}; sections[sec].total++; if(r.correct)sections[sec].correct++; if(!r.correct)sections[sec].skills[r.q.title]=(sections[sec].skills[r.q.title]||0)+1;}); examEls.heatMap.innerHTML=Object.keys(sections).map(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100), cls=sp>=75?'green-card':sp>=50?'amber-card':'red-card', label=sp>=75?'Strong':sp>=50?'Keep practising':'Practise next'; return `<div class="heat-card ${cls}"><h3>${escapeHtml(sec)}</h3><strong>${label}</strong><div>${s.correct}/${s.total} · ${sp}%</div><p>${escapeHtml(topicFeedback(sec,sp))}</p></div>`;}).join(''); const weakest=Object.keys(sections).map(sec=>({sec,pct:sections[sec].correct/sections[sec].total})).sort((a,b)=>a.pct-b.pct)[0]; const overall=pct>=85?'Excellent result. Your verbal reasoning accuracy is strong across this practice. Review any questions you missed so speed does not cost marks.':pct>=65?`Good result. Focus next on ${weakest?.sec||'the topic with your lowest score'} and check the worked answers.`:`Focus next on ${weakest?.sec||'the topic with your lowest score'}. Review the worked answers, then practise one topic at a time before trying another timed set.`; examEls.overallFeedback.textContent=overall; examEls.resultsReviewList.innerHTML=exam.results.map((r,i)=>`<div class="review-item"><div class="review-main"><span>Q${i+1}: ${escapeHtml(r.q.title)} <em style="color:#667">(${escapeHtml(r.q.section)})</em></span>${r.correct?'':`<div class="wrong-explain"><strong>How to work it out:</strong> ${escapeHtml(feedbackForReview(r.q,r))}</div>`}</div><span class="mark ${r.correct?'ok':'no'}">${r.correct?'✓ correct':'✗ review'}</span></div>`).join(''); buildPrintResults(sections,pct,overall); window.scrollTo({top:0,behavior:'smooth'});}
-    function renderReviewQuestion(index=exam.index){exam.review=true; exam.index=clamp(index,0,exam.questions.length-1); examEls.resultsScreen.classList.add('hidden'); examEls.examScreen.classList.remove('hidden'); const q=currentQ(), r=exam.results[exam.index]; renderTop(); examEls.questionNumber.textContent=`Review question ${exam.index+1}`; examEls.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">${r.correct?'Correct':'Needs review'}</span>`; examEls.stimulusBox.innerHTML=q.stimulus||''; examEls.questionText.innerHTML=escapeHtml(q.prompt); renderLockedAnswer(q,r); examEls.reviewFeedback.className=`feedback ${r.correct?'good':'bad'}`; const lead=r.correct?'Correct.':'How to work it out:'; examEls.reviewFeedback.innerHTML=`<strong>${lead}</strong><br>${escapeHtml(feedbackForReview(q,r))}<br><strong>Your answer:</strong> ${escapeHtml(displayValue(r.user))}<br><strong>Correct answer:</strong> ${escapeHtml(answerLabel(q))}`; examEls.reviewFeedback.classList.remove('hidden'); examEls.sideSummary.innerHTML=`<strong>Your answer:</strong><br>${escapeHtml(displayValue(r.user))}<br><br><strong>Correct answer:</strong><br>${escapeHtml(answerLabel(q))}`; examEls.flagBtn.textContent='Back to results'; examEls.finishBtn.classList.add('hidden'); examEls.nextBtn.textContent=exam.index===exam.questions.length-1?'Back to results':'Next review'; examEls.prevBtn.disabled=exam.index===0; examEls.nextBtn.disabled=false; examEls.questionPanel.focus({preventScroll:true});}
-    function renderLockedAnswer(q,r){
-      const user=r.user;
-      if(q.kind==='multi'){
-        const selected=new Set(Array.isArray(user)?user.map(key):[]), answers=new Set(q.answer.map(key));
-        examEls.answerArea.innerHTML=`<div class="multi-grid">${q.choices.map(c=>{const correct=answers.has(key(c.value)), chosen=selected.has(key(c.value)); const status=correct?'correct answer':chosen?'your answer; not correct':'not selected'; return `<button type="button" disabled class="multi-btn ${correct?'correct':''} ${chosen&&!correct?'wrong':''}" aria-label="${escapeHtml(c.label)}: ${status}">${escapeHtml(c.label)}</button>`;}).join('')}</div>`;
-        return;
-      }
-      if(q.kind==='order'){
-        const arr=Array.isArray(user)&&user.length?user:[];
-        examEls.answerArea.innerHTML=`<div class="order-area"><strong>Your order</strong><div class="slot-row">${(arr.length?arr:['No answer selected']).map((item,i)=>`<button type="button" disabled class="answer-slot ${key(item)===key(q.answer[i]||'')?'correct':'wrong'}">${escapeHtml(item)}</button>`).join('')}</div><strong>Correct order</strong><div class="slot-row">${q.answer.map(item=>`<button type="button" disabled class="answer-slot correct">${escapeHtml(item)}</button>`).join('')}</div></div>`;
-        return;
-      }
-      if(q.kind==='match'){
-        const chosen=user||{};
-        examEls.answerArea.innerHTML=`<div class="match-area">${Object.keys(q.answer).map(term=>{const correct=key(chosen[term]||'')===key(q.answer[term]); return `<div class="match-row"><div class="match-term">${escapeHtml(term)}</div><div class="match-term ${correct?'correct':'wrong'}">${escapeHtml(chosen[term]||'Not answered')} ${correct?'✓':'→ '+escapeHtml(q.answer[term])}</div></div>`;}).join('')}</div>`;
-        return;
-      }
-      examEls.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((c,i)=>{const isUser=user!==undefined&&key(user)===key(c.value), isAns=key(q.answer)===key(c.value); const status=isAns?'correct answer':isUser?'your answer; not correct':'not selected'; return `<button type="button" disabled class="choice-btn ${isAns?'correct':''} ${isUser&&!isAns?'wrong':''}" aria-label="${escapeHtml(c.label)}: ${status}"><span class="choice-letter">${letters[i]}</span><span>${escapeHtml(c.label)}</span></button>`;}).join('')}</div>`;
+    const examV2 = {
+      questions:[], answers:{}, flagged:new Set(), index:0, results:[], score:0, maxScore:0, finished:false, review:false,
+      timerId:null, endsAt:0, totalSeconds:0, timed:true, mode:'mock', seed:'', paperCode:'', full:true, mock:true,
+      timeMultiplier:1, lastSavedSecond:null, timedOut:false
+    };
+
+    function sectionForV2(topic) { return EXAM_SPEC_V2.find(s=>s.topic===topic)?.section || TOPICS[topic]?.name || 'Verbal Reasoning'; }
+    function cloneAnswerV2(value) { return Array.isArray(value) ? value.slice() : value && typeof value === 'object' ? Object.assign({},value) : value; }
+    function displayValueV2(value) { return fmtAnswer(value === undefined || value === null || value === '' ? 'No answer selected' : value); }
+    function answerLabelV2(q,value=q.answer) { return fmtAnswer(value); }
+    function studentTitleV2(title) {
+      const cleaned=String(title||'Verbal reasoning').replace(/^(?:Further|Additional|Final|Exam|Verified|Supplement)\s+/i,'').replace(/\s+/g,' ').trim();
+      return cleaned.charAt(0).toUpperCase()+cleaned.slice(1);
     }
-    function backToResults(){exam.review=false; examEls.examScreen.classList.add('hidden'); examEls.resultsScreen.classList.remove('hidden'); examEls.prevBtn.disabled=false; examEls.nextBtn.disabled=false; examEls.finishBtn.classList.remove('hidden'); examEls.finishBtn.textContent='Finish practice'; examEls.flagBtn.textContent='Flag question'; window.scrollTo({top:0,behavior:'smooth'});}
-    function buildPrintResults(sections,pct,overall){examEls.printResults.innerHTML=`<h1>11+ Verbal Reasoning Results</h1><p>Score: ${exam.score}/${exam.questions.length} (${pct}%)</p><p>${escapeHtml(overall)}</p><h2>How you did by topic</h2>${Object.keys(sections).map(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100); return `<p><strong>${escapeHtml(sec)}</strong>: ${s.correct}/${s.total} (${sp}%)</p>`;}).join('')}`;}
-    function pdfEscape(s){return String(s).replace(/£/g,'GBP').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/→/g,'->').replace(/[–—−]/g,'-').replace(/…/g,'...').replace(/×/g,'x').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,'').replace(/\s+/g,' ').replace(/[\\()]/g,'\\$&');}
-    function downloadResultsPDF(){const pct=Math.round(exam.score/exam.questions.length*100), lines=['11+ Verbal Reasoning Results',`Score: ${exam.score}/${exam.questions.length} (${pct}%)`,`Date: ${new Date().toLocaleString('en-GB')}`,'','How you did by topic:']; const sections={}; exam.results.forEach(r=>{const sec=r.q.section; if(!sections[sec])sections[sec]={total:0,correct:0}; sections[sec].total++; if(r.correct)sections[sec].correct++;}); Object.keys(sections).forEach(sec=>{const s=sections[sec], sp=Math.round(s.correct/s.total*100), label=sp>=75?'Strong':sp>=50?'Keep practising':'Practise next'; lines.push(`${sec}: ${s.correct}/${s.total} (${sp}%) - ${label}`);}); lines.push('','Questions to review:'); exam.results.forEach((r,i)=>{if(!r.correct){lines.push(`Q${i+1} ${r.q.section} - ${r.q.title}`); lines.push(`Correct answer: ${answerLabel(r.q)}`); lines.push(`How to work it out: ${feedbackForReview(r.q,r)}`);}}); if(exam.results.every(r=>r.correct))lines.push('No incorrect questions. Excellent work.'); createSimplePdf(lines,'11_plus_verbal_reasoning_results.pdf');}
-    function wrapPdfLines(lines,max=88){const wrapped=[]; lines.forEach(line=>{const words=String(line).trim().split(/\s+/).filter(Boolean); if(!words.length){wrapped.push(''); return;} let current=''; words.forEach(original=>{let word=original; while(word.length>max){if(current){wrapped.push(current); current='';} wrapped.push(word.slice(0,max)); word=word.slice(max);} const next=current?`${current} ${word}`:word; if(next.length>max){wrapped.push(current); current=word;} else current=next;}); if(current)wrapped.push(current);}); return wrapped;}
-    function createSimplePdf(lines,filename){const wrappedLines=wrapPdfLines(lines), pageLines=[]; for(let i=0;i<wrappedLines.length;i+=42)pageLines.push(wrappedLines.slice(i,i+42)); const objects=[]; function add(obj){objects.push(obj); return objects.length;} add('<< /Type /Catalog /Pages 2 0 R >>'); const pagesIndex=add(''), font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'), pageRefs=[]; pageLines.forEach(pl=>{const content='BT /F1 11 Tf 50 790 Td 14 TL '+pl.map(line=>`(${pdfEscape(line)}) Tj T*`).join(' ')+' ET'; const contentObj=add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`); const pageObj=add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${contentObj} 0 R >>`); pageRefs.push(`${pageObj} 0 R`);}); objects[pagesIndex-1]=`<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pageRefs.length} >>`; let pdf='%PDF-1.4\n'; const offsets=[0]; objects.forEach((obj,i)=>{offsets[i+1]=pdf.length; pdf+=`${i+1} 0 obj\n${obj}\nendobj\n`;}); const xref=pdf.length; pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(o=>String(o).padStart(10,'0')+' 00000 n ').join('\n')+`\ntrailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`; const blob=new Blob([pdf],{type:'application/pdf'}), a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},500);}
-    examEls.startBtn.addEventListener('click',()=>startExam(true)); examEls.sampleBtn.addEventListener('click',()=>startExam(false));
-    examEls.prevBtn.addEventListener('click',()=>{if(exam.review)renderReviewQuestion(exam.index-1); else go(-1);}); examEls.nextBtn.addEventListener('click',()=>{if(exam.review){if(exam.index<exam.questions.length-1)renderReviewQuestion(exam.index+1); else backToResults();} else if(exam.index<exam.questions.length-1)go(1); else finishExam(false);});
-    examEls.flagBtn.addEventListener('click',()=>{if(exam.review){backToResults(); return;} const q=currentQ(); if(exam.flagged.has(q.uid))exam.flagged.delete(q.uid); else exam.flagged.add(q.uid); examEls.flagBtn.textContent=exam.flagged.has(q.uid)?'Remove flag':'Flag question'; renderTop(); updateSide();});
-    examEls.finishBtn.addEventListener('click',()=>{if(exam.review)backToResults(); else finishExam(false);}); examEls.downloadPdfBtn.addEventListener('click',downloadResultsPDF); examEls.reviewBtn.addEventListener('click',()=>renderReviewQuestion(0)); examEls.retakeBtn.addEventListener('click',()=>{examEls.resultsScreen.classList.add('hidden'); examEls.startScreen.classList.remove('hidden'); window.scrollTo({top:0,behavior:'smooth'});});
+    function skillFamilyV2(value) {
+      const topic=String(value?.topic||'');
+      const title=studentTitleV2(value?.title||value||'').toLowerCase();
+      const patterns=[
+        [/calendar|days and months|day sequence/,'calendar'],
+        [/letter pair/,'letter-pair-sequence'],
+        [/alternating.*(?:sequence|alphabet)|two interwoven/,'alternating-sequence'],
+        [/number.?letter|letter.?number|mixed letter number/,'mixed-letter-number'],
+        [/alphabetic(?:al)? order/,'alphabetical-order'],
+        [/caesar|shift(?:ed)? word|decode word|alphabet shift/,'word-shift-code'],
+        [/reverse alphabet/,'reverse-alphabet'],
+        [/alphabet value|word value|position total/,'alphabet-values'],
+        [/first.?last|first and last/,'first-last-code'],
+        [/anagram/,'anagram'],
+        [/hidden word/,'hidden-word'],
+        [/remove one letter|remove a letter/,'remove-letter'],
+        [/add one letter/,'add-letter'],
+        [/changed letter|word ladder/,'change-letter'],
+        [/synonym|closest meaning/,'synonym'],
+        [/antonym|opposite meaning/,'antonym'],
+        [/cloze/,'cloze'],
+        [/homophone|confused word|spelling/,'spelling-context'],
+        [/prefix|suffix|word part/,'word-parts'],
+        [/odd one out.*category|odd word out|odd one out by meaning/,'category-odd-one-out'],
+        [/letter feature|spelling feature/,'letter-feature'],
+        [/shared first|common first|shared beginning/,'shared-first-compound'],
+        [/shared (?:final|last)|common final|shared ending/,'shared-final-compound'],
+        [/order(?:ing)? clue|order from clues/,'ordering-clues'],
+        [/seating/,'seating-clues'],
+        [/conclusion|deduction statement|verbal deduction/,'verbal-deduction']
+      ];
+      const match=patterns.find(([pattern])=>pattern.test(title));
+      return topic+':'+(match?match[1]:title.replace(/[^a-z0-9]+/g,'-'));
+    }
+    function questionMaxScoreV2(q) {
+      if(q.kind==='multi'||q.kind==='order') return Math.max(1,Array.isArray(q.answer)?q.answer.length:1);
+      if(q.kind==='match') return Math.max(1,Object.keys(q.answer||{}).length);
+      return 1;
+    }
+    function scoreQuestionV2(q,value) {
+      const max=questionMaxScoreV2(q);
+      let earned=0;
+      if(q.kind==='multi') {
+        const selected=new Set(Array.isArray(value)?value.map(key):[]);
+        earned=(q.answer||[]).map(key).filter(a=>selected.has(a)).length;
+      } else if(q.kind==='order') {
+        const selected=Array.isArray(value)?value:[];
+        earned=(q.answer||[]).reduce((sum,a,i)=>sum+(key(selected[i]||'')===key(a)?1:0),0);
+      } else if(q.kind==='match') {
+        const selected=value&&typeof value==='object'?value:{};
+        earned=Object.keys(q.answer||{}).reduce((sum,left)=>sum+(key(selected[left]||'')===key(q.answer[left])?1:0),0);
+      } else {
+        earned=key(value||'')===key(q.answer||'')?1:0;
+      }
+      return {earned,max,correct:earned===max};
+    }
+    function isAnsweredV2(q) {
+      const value=examV2.answers[q.uid];
+      if(value===undefined||value===null) return false;
+      if(q.kind==='multi') return Array.isArray(value)&&value.length===(q.selectCount||(q.answer||[]).length);
+      if(q.kind==='order') return Array.isArray(value)&&value.length===(q.answer||[]).length;
+      if(q.kind==='match') return value&&typeof value==='object'&&Object.keys(q.answer||{}).every(left=>String(value[left]||'').length>0);
+      return String(value).length>0;
+    }
+    function entryKindV2(entry) { try { return entry.gen(entry.difficulty||3).kind||'mc'; } catch { return 'mc'; } }
+    const ENTRY_KIND_V2=new Map(BANK.map(entry=>[entry.id,entryKindV2(entry)]));
+    function difficultyPlanV2(count) {
+      const levels=[1,2,3,4,5], counts=Object.fromEntries(levels.map(level=>[level,Math.floor(count/5)]));
+      const extras=[3,2,4,1,5];
+      for(let i=0;i<count%5;i++) counts[extras[i]]++;
+      return shuffle(levels.flatMap(level=>Array(counts[level]).fill(level)));
+    }
+    function pickEntriesByTopicV2(topic,count,used,requiredKind=null,usedSkills=new Set()) {
+      const out=[];
+      for(const difficulty of difficultyPlanV2(count)) {
+        let pool=BANK.filter(entry=>entry.topic===topic&&!used.has(entry.id)&&entry.difficulty===difficulty&&(!requiredKind||ENTRY_KIND_V2.get(entry.id)===requiredKind));
+        if(!pool.length) pool=BANK.filter(entry=>entry.topic===topic&&!used.has(entry.id)&&(!requiredKind||ENTRY_KIND_V2.get(entry.id)===requiredKind));
+        const freshFamilies=pool.filter(entry=>!usedSkills.has(skillFamilyV2(entry)));
+        if(freshFamilies.length) pool=freshFamilies;
+        if(!pool.length) throw new Error(`Not enough ${topic} questions for this paper.`);
+        const chosen=pick(pool); out.push(chosen); used.add(chosen.id); usedSkills.add(skillFamilyV2(chosen));
+      }
+      return out;
+    }
+    function normaliseQuestionPartV2(value) { return String(value??'').replace(/<[^>]*>/g,' ').replace(/&(?:[a-z]+|#\d+);/gi,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
+    function questionSignatureV2(q) {
+      let interaction='';
+      if(q.kind==='match') interaction=`${(q.pairs||[]).map(p=>p.left).join('|')}|${(q.options||[]).slice().sort().join('|')}`;
+      else if(q.kind==='order') interaction=(q.tiles||[]).slice().sort().join('|');
+      else interaction=(q.choices||[]).map(c=>c.label).slice().sort().join('|');
+      const canonical=value=>normaliseQuestionPartV2(value).split(' ').filter(Boolean).sort().join(' ');
+      return [q.topic,skillFamilyV2(q),canonical(q.prompt),canonical(q.stimulus),canonical(interaction)].join(' || ');
+    }
+    function questionIsSuitableV2(q) {
+      if(q.kind!=='mc') return true;
+      const generic=new Set(['cannot tell','none of these','both are possible','all of these','same meaning','opposite meaning','both','neither','same rule','different rule']);
+      return (q.choices||[]).every(c=>key(c.value)===key(q.answer)||!generic.has(key(c.value)));
+    }
+    function curatedMcV3(topic,title,prompt,answer,distractors,opts={}) {
+      const values=opts.choices||[answer].concat(distractors||[]);
+      const q=qBase(topic,title,opts.stage||3,'mc',prompt,answer,{
+        stimulus:opts.stimulus||'',
+        choices:shuffle(unique(values.map(String),key)).map(value=>({value,label:value})),
+        hint:opts.hint||'Identify the exact rule before comparing the choices.',
+        explanation:opts.explanation||''
+      });
+      q.section=sectionForV2(topic);
+      q.title=title;
+      q.skillId=opts.skillId||title.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+      return polishQuestion(q);
+    }
+    function createCuratedMockV3() {
+      const q=curatedMcV3;
+      const groups={
+        vocab:[
+          q('vocab','Closest meaning','Choose the word closest in meaning to reluctant.','unwilling',['careless','cheerful','certain'],{stage:2,hint:'Replace reluctant with each choice and keep the meaning unchanged.',explanation:'Reluctant means unwilling or hesitant to do something.'}),
+          q('vocab','Opposite meaning','Choose the word opposite in meaning to scarce.','plentiful',['valuable','hidden','tiny'],{stage:2,hint:'Think about whether there is very little or a great deal.',explanation:'Scarce means in short supply; plentiful means available in large amounts.'}),
+          q('vocab','Meaning in context','The path became treacherous after the water froze. What does treacherous mean here?','dangerous',['narrow','unfamiliar','crowded'],{stage:3,hint:'Use the clue about frozen water to infer the meaning.',explanation:'Frozen water can make a path dangerous and difficult to cross safely.'}),
+          q('vocab','Confused word in context','Choose the word that correctly completes the sentence: The loud noise did not ___ her concentration.','affect',['effect','infect','afford'],{stage:4,hint:'The gap needs a verb meaning change or influence.',explanation:'Affect is the verb meaning to influence. Effect is usually a noun meaning a result.'}),
+          q('vocab','Precise cloze','Despite the delay, Arun remained ___ and calmly explained the problem.','composed',['furious','careless','puzzling'],{stage:3,hint:'The word must agree with calmly explained.',explanation:'Composed means calm and in control, which matches the rest of the sentence.'}),
+          q('vocab','Idiom meaning','What does keep an eye on mean in the sentence: Please keep an eye on the soup while I answer the door?','watch carefully',['taste immediately','move away','cover completely'],{stage:2,hint:'Do not interpret the phrase literally.',explanation:'To keep an eye on something means to watch it carefully.'}),
+          q('vocab','Prefix meaning','In the word misjudge, what does the prefix mis- mean?','wrongly',['again','before','together'],{stage:2,hint:'Think about what it means to misjudge a situation.',explanation:'Mis- means wrongly or badly, so misjudge means judge wrongly.'}),
+          q('vocab','Suffix meaning','What does the suffix -less mean in the word fearless?','without',['full of','able to','made from'],{stage:2,hint:'Use the whole word fearless to test each meaning.',explanation:'The suffix -less means without, so fearless means without fear.'}),
+          q('vocab','Definition selection','Which word means very careful and precise about small details?','meticulous',['reckless','ordinary','temporary'],{stage:4,hint:'Look for the word describing close attention to every detail.',explanation:'Meticulous means extremely careful and precise.'}),
+          q('vocab','Word family','Which word does not belong to the act word family?','accident',['action','active','reaction'],{stage:4,hint:'Check whether each word is built from act with the same core meaning.',explanation:'Action, active and reaction are formed from act. Accident is unrelated to that word family.'})
+        ],
+        analogies:[
+          q('analogies','Clothing and body','Glove is to hand as sock is to ____.','foot',['shoe','toe','ankle'],{stage:1,hint:'Each item of clothing is worn on a body part.',explanation:'A glove is worn on a hand; a sock is worn on a foot.'}),
+          q('analogies','Young animals','Cub is to bear as foal is to ____.','horse',['goat','sheep','deer'],{stage:2,hint:'Match each young animal to the adult animal.',explanation:'A cub is a young bear; a foal is a young horse.'}),
+          q('analogies','Object and function','Knife is to cut as pen is to ____.','write',['fold','measure','erase'],{stage:2,hint:'Identify what each object is mainly used to do.',explanation:'A knife is used to cut; a pen is used to write.'}),
+          q('analogies','Part and whole','Page is to book as brick is to ____.','wall',['clay','roof','window'],{stage:2,hint:'The first thing is one component of the second.',explanation:'Pages make up a book; bricks make up a wall.'}),
+          q('analogies','Degree of meaning','Whisper is to speak as drizzle is to ____.','rain',['cloud','water','fog'],{stage:3,hint:'The first word is a gentler form of the second.',explanation:'A whisper is a quiet form of speaking; drizzle is a light form of rain.'}),
+          q('analogies','Opposite relationships','Generous is to selfish as cautious is to ____.','reckless',['patient','quiet','alert'],{stage:3,hint:'The two words in each pair must be opposites.',explanation:'Generous and selfish are opposites; cautious and reckless are opposites.'}),
+          q('analogies','Worker and tool','Carpenter is to hammer as tailor is to ____.','needle',['thread','cloth','button'],{stage:2,hint:'Choose the tool most closely linked to the worker.',explanation:'A carpenter uses a hammer; a tailor uses a needle.'}),
+          q('analogies','Animal and home','Bird is to nest as bee is to ____.','hive',['web','den','stable'],{stage:2,hint:'Match each animal to its home.',explanation:'A bird lives in a nest; a bee lives in a hive.'}),
+          q('analogies','Material relationship','Glass is to sand as paper is to ____.','wood',['ink','cloth','stone'],{stage:4,hint:'The second word names the main raw material used to make the first.',explanation:'Glass is made mainly from sand; paper is made mainly from wood pulp.'}),
+          q('analogies','Word form relationship','Decide is to decision as conclude is to ____.','conclusion',['conclusive','concluding','concluded'],{stage:4,hint:'Change the verb into its matching noun.',explanation:'Decision is the noun formed from decide; conclusion is the noun formed from conclude.'})
+        ],
+        classification:[
+          q('classification','Odd one out: planets','Which is the odd one out?','violin',['Mercury','Venus','Mars'],{stage:1,stimulus:wordBank(['Mercury','Venus','Mars','violin']),hint:'Find the three words in the same category.',explanation:'Mercury, Venus and Mars are planets. A violin is a musical instrument.'}),
+          q('classification','Odd one out: tools','Which is the odd one out?','tulip',['chisel','saw','spanner'],{stage:1,stimulus:wordBank(['chisel','saw','spanner','tulip']),hint:'Find the three objects used to do practical work.',explanation:'A chisel, saw and spanner are tools. A tulip is a flower.'}),
+          q('classification','Action group','Which word does not belong with the other three?','listen',['whisper','shout','murmur'],{stage:2,stimulus:wordBank(['whisper','shout','murmur','listen']),hint:'Three words describe producing speech; one describes receiving sound.',explanation:'Whisper, shout and murmur are ways of speaking. Listen means paying attention to sound.'}),
+          q('classification','Letter shape feature','Which capital letter is different from the others?','B',['D','O','P'],{stage:3,stimulus:wordBank(['B','D','O','P']),hint:'Count the completely enclosed spaces in each printed capital.',explanation:'B has two enclosed spaces. D, O and P each have one.'}),
+          q('classification','Animal class','Which is the odd one out?','shark',['seal','dolphin','whale'],{stage:2,stimulus:wordBank(['seal','dolphin','whale','shark']),hint:'Classify the animals by biological group.',explanation:'Seal, dolphin and whale are mammals. A shark is a fish.'}),
+          q('classification','Relationship pair','Which pair has a different relationship from the others?','chick : sheep',['calf : cow','foal : horse','cub : lion'],{stage:3,hint:'In three pairs, the first word is the young of the second animal.',explanation:'A chick is not a young sheep; a lamb is. The other three pairs correctly match young and adult animals.'}),
+          q('classification','Suffix group','Which word has a different suffix from the others?','kindness',['careless','fearless','hopeless'],{stage:2,stimulus:wordBank(['careless','fearless','hopeless','kindness']),hint:'Look at the ending added to each root word.',explanation:'Careless, fearless and hopeless end in -less. Kindness ends in -ness.'}),
+          q('classification','Double-letter feature','Which word does not contain a doubled letter?','river',['coffee','green','school'],{stage:2,stimulus:wordBank(['coffee','green','school','river']),hint:'Look for two identical letters next to one another.',explanation:'Coffee has ff, green has ee and school has oo. River has no doubled letter.'}),
+          q('classification','Complete the direction set','Which word completes the group: north, east, south, ____?','west',['left','up','forward'],{stage:1,hint:'The group contains the four main compass directions.',explanation:'North, east, south and west are the four main compass directions.'}),
+          q('classification','Odd one out: plants','Which is the odd one out?','daisy',['oak','elm','willow'],{stage:2,stimulus:wordBank(['oak','elm','willow','daisy']),hint:'Three are types of tree.',explanation:'Oak, elm and willow are trees. A daisy is a flowering plant, not a tree.'})
+        ],
+        compounds:[
+          q('compounds','Complete a compound','Which ending completes rain___ to name a coloured arc sometimes seen in the sky?','bow',['coat','drop','storm'],{stage:1,hint:'Use the definition to choose among the possible rain compounds.',explanation:'Rain + bow makes rainbow, the coloured arc described.'}),
+          q('compounds','Compound ending','Which word joins tooth to name a hand-held object with bristles for cleaning teeth?','brush',['paste','ache','pick'],{stage:1,hint:'Use the exact definition as well as the compound.',explanation:'Tooth + brush makes toothbrush, the hand-held bristled object described.'}),
+          q('compounds','Shared first word','Which word can go before both burn and flower to make two compound words?','sun',['moon','star','day'],{stage:2,hint:'Test the same word with both endings.',explanation:'Sunburn and sunflower are both compound words.'}),
+          q('compounds','Shared final word','Which word can go after both foot and base to make two compound words?','ball',['step','shoe','fall'],{stage:2,hint:'Test the same ending after both starting words.',explanation:'Football and baseball are both compound words.'}),
+          q('compounds','Compound pair','Which pair joins to make a standard compound word?','book + case',['paper + shelf','read + room','page + bag'],{stage:2,hint:'Join each pair without changing either word.',explanation:'Book + case makes bookcase.'}),
+          q('compounds','Compound meaning','Which compound word means a dark surface used for writing or drawing in a classroom?','blackboard',['blackbird','blackberry','blacksmith'],{stage:2,hint:'Match the whole compound to the definition.',explanation:'A blackboard is a dark board used for writing or drawing.'}),
+          q('compounds','Middle-word chain','Which word completes both compounds: note ___ and ___ mark?','book',['pad','paper','letter'],{stage:4,hint:'The missing word must finish the first compound and begin the second.',explanation:'Notebook and bookmark are both standard compound words, so book is the shared word.'}),
+          q('compounds','Compound from a definition','Which two parts form the compound word for a winged insect?','butter + fly',['cream + fly','butter + bee','yellow + wing'],{stage:2,hint:'Join the two parts and check the definition.',explanation:'Butter + fly makes butterfly.'})
+        ],
+        codes:[
+          q('codes','Alphabet position','What is the alphabet position of M?','13',['11','12','14'],{stage:1,stimulus:svgAlphabet(['M']),hint:'Count A as 1, B as 2 and so on.',explanation:'M is the 13th letter of the alphabet.'}),
+          q('codes','Move forward','Which letter is five places after H?','M',['L','N','O'],{stage:2,stimulus:svgAlphabet(['H','M']),hint:'Move one place at a time: I is the first place after H.',explanation:'H to I, J, K, L, M is five forward moves, so the answer is M.'}),
+          q('codes','Move backwards','Which letter is four places before T?','P',['O','Q','R'],{stage:2,stimulus:svgAlphabet(['P','T']),hint:'Count backwards from T without counting T itself.',explanation:'One place before T is S, then R, Q and P. The answer is P.'}),
+          q('codes','Word value','Using A=1, B=2 and so on up to Z=26, what is the value of FISH?','42',['40','41','43'],{stage:2,stimulus:svgAlphabet(['F','I','S','H']),hint:'Add the value of every letter.',explanation:'F=6, I=9, S=19 and H=8. Therefore 6 + 9 + 19 + 8 = 42.'}),
+          q('codes','Forward word code','In a code, every letter moves forward two places. MAP becomes OCR. How is DOG written?','FQI',['EPH','FQJ','BNF'],{stage:3,hint:'Apply the same +2 shift to each letter.',explanation:'D+2=F, O+2=Q and G+2=I, so DOG becomes FQI.'}),
+          q('codes','Decode a shifted word','Every letter was moved forward three places to make the code. What word was coded as IURJ?','FROG',['GSPH','FROK','JVSN'],{stage:4,hint:'To decode, reverse the rule and move every coded letter back three places.',explanation:'I-3=F, U-3=R, R-3=O and J-3=G, giving FROG.'}),
+          q('codes','Reverse alphabet code','Use opposite alphabet letters: A becomes Z, B becomes Y, and so on. How is DOG coded?','WLT',['DLG','XMU','VKS'],{stage:4,hint:'Pair letters from the two ends of the alphabet.',explanation:'D pairs with W, O pairs with L and G pairs with T, so DOG becomes WLT.'}),
+          q('codes','Number-to-word code','Using A=1, B=2 and so on up to Z=26, which word is 3-1-20?','CAT',['BAT','CAR','CUT'],{stage:2,hint:'Convert each number separately into a letter.',explanation:'3=C, 1=A and 20=T, so the code spells CAT.'}),
+          q('codes','First-and-last code','A word is coded using the positions of its first and last letters. What is the code for TRAIN?','20-14',['20-13','19-14','14-20'],{stage:3,hint:'Find only the first and last letters, then convert each to a number.',explanation:'TRAIN begins with T (20) and ends with N (14), so its code is 20-14.'}),
+          q('codes','Alternating shift code','A code moves the 1st letter forward 1, the 2nd back 1, the 3rd forward 1, and so on. How is CODE coded?','DNED',['DPED','BNCF','DNEF'],{stage:5,hint:'Apply +1, -1, +1, -1 in order.',explanation:'C+1=D, O-1=N, D+1=E and E-1=D, so CODE becomes DNED.'}),
+          q('codes','Rule from an example','TEAM is coded as MAET. Using the same rule, how is SHIP coded?','PIHS',['TIJQ','SHIP','PHIS'],{stage:3,hint:'Describe exactly what happened to the order of the letters in TEAM.',explanation:'The code reverses the word. Reversing SHIP gives PIHS.'}),
+          q('codes','Code table lookup','Use the code table. What is the code for rabbit?','TX',['LM','QR','BN'],{stage:2,stimulus:codeTable(['Animal','Code'],[['cat','LM'],['dog','QR'],['rabbit','TX'],['fish','BN']]),hint:'Find rabbit in the table and read the code from the same row.',explanation:'Rabbit and TX are in the same row, so the code is TX.'})
+        ],
+        sequences:[
+          q('sequences','Constant forward step','What letter comes next?','N',['L','M','O'],{stage:2,stimulus:sequenceStrip(['B','E','H','K','?']),hint:'Measure the alphabet step between consecutive letters.',explanation:'The sequence moves forward 3 places each time: B, E, H, K, N.'}),
+          q('sequences','Constant backward step','What letter comes next?','K',['J','L','M'],{stage:2,stimulus:sequenceStrip(['W','T','Q','N','?']),hint:'Measure the backward alphabet step.',explanation:'The sequence moves back 3 places each time: W, T, Q, N, K.'}),
+          q('sequences','Two interwoven sequences','What letter comes next?','G',['T','H','U'],{stage:4,stimulus:sequenceStrip(['A','Z','C','X','E','V','?']),hint:'Read the 1st, 3rd, 5th terms separately from the 2nd, 4th, 6th terms.',explanation:'Odd-position letters are A, C, E, G (+2). Even-position letters are Z, X, V (-2). The next term is G.'}),
+          q('sequences','Increasing steps','What letter comes next?','R',['Q','S','T'],{stage:5,stimulus:sequenceStrip(['C','D','F','I','M','?']),hint:'Check whether the jump grows by one each time.',explanation:'The jumps are +1, +2, +3 and +4. The next jump is +5, taking M to R.'}),
+          q('sequences','Opposite-moving pairs','What pair comes next?','EV',['EU','FV','EW'],{stage:4,stimulus:sequenceStrip(['AZ','BY','CX','DW','?']),hint:'Track the first and second letters separately.',explanation:'First letters move A, B, C, D, E while second letters move Z, Y, X, W, V. The next pair is EV.'}),
+          q('sequences','Number-letter terms','What term comes next?','10I',['9I','10H','12I'],{stage:3,stimulus:sequenceStrip(['2A','4C','6E','8G','?']),hint:'Find one rule for the numbers and another for the letters.',explanation:'Numbers increase by 2 and letters move forward by 2: 2A, 4C, 6E, 8G, 10I.'}),
+          q('sequences','Repeating step pattern','What letter comes next?','P',['N','O','Q'],{stage:5,stimulus:sequenceStrip(['A','C','F','H','K','M','?']),hint:'Write the size of each jump and look for a repeating cycle.',explanation:'The jumps repeat +2, +3: A to C (+2), C to F (+3), F to H (+2), H to K (+3), K to M (+2). The next +3 jump gives P.'}),
+          q('sequences','Calendar sequence','What day comes next?','Sunday',['Saturday','Monday','Tuesday'],{stage:2,stimulus:sequenceStrip(['Monday','Wednesday','Friday','?']),hint:'Each term moves forward the same number of days.',explanation:'The sequence advances by two days: Monday, Wednesday, Friday, Sunday.'}),
+          q('sequences','Consecutive letter pairs','What pair comes next?','MN',['LM','NO','MO'],{stage:3,stimulus:sequenceStrip(['AB','DE','GH','JK','?']),hint:'Track the starting letter of each consecutive pair.',explanation:'Each pair contains consecutive letters. Pair starts move A, D, G, J, M (+3), so the next pair is MN.'}),
+          q('sequences','Mixed opposite sequence','What term comes next?','9R',['8R','9S','11R'],{stage:4,stimulus:sequenceStrip(['1Z','3X','5V','7T','?']),hint:'Track the numbers and letters as separate sequences.',explanation:'Numbers increase by 2: 1, 3, 5, 7, 9. Letters move back by 2: Z, X, V, T, R. The next term is 9R.'})
+        ],
+        wordplay:[
+          q('wordplay','Anagram recognition','Which word is an anagram of LISTEN?','SILENT',['LITTLE','ISLAND','INSERT'],{stage:2,hint:'Use every letter exactly once.',explanation:'LISTEN and SILENT contain exactly the same six letters, each used once.'}),
+          q('wordplay','Hidden word inside','Which word is hidden as consecutive letters inside TEACHER?','ACHE',['ECHO','HEAT','ARCH'],{stage:2,stimulus:wordBank(['TEACHER']),hint:'Keep the letters together and in the same order.',explanation:'TEACHER contains T E ACHE R, so ACHE is hidden inside it.'}),
+          q('wordplay','Hidden word across words','Which animal is hidden across two words in this sentence: The box ended up under the table?','OXEN',['OX','HEN','FOX'],{stage:4,hint:'Ignore the space between neighbouring words.',explanation:'The end of box and start of ended give bOX ENded, spelling OXEN.'}),
+          q('wordplay','Remove the first letter','Remove the first letter from SMILE. Which word remains?','MILE',['SLIM','LIME','SMILE'],{stage:1,hint:'Delete only the first letter; do not rearrange anything.',explanation:'Removing the first letter S from SMILE leaves MILE.'}),
+          q('wordplay','Add a starting letter','Add one letter to the start of RAIN to make a vehicle.','TRAIN',['BRAIN','DRAIN','GRAIN'],{stage:2,hint:'The original letters must remain together in the same order.',explanation:'Adding T to the start of RAIN makes TRAIN, which is a vehicle.'}),
+          q('wordplay','Identify the changed letter','SHIP changes to SHOP when one letter is replaced. Which letter in SHIP was changed?','I',['S','H','P'],{stage:2,hint:'Compare corresponding positions in the two words.',explanation:'Only the third letter changes: I in SHIP becomes O in SHOP.'}),
+          q('wordplay','One-letter word change','Change one letter in COLD to make a word meaning a thick string or rope.','CORD',['CARD','BOLD','COLT'],{stage:3,hint:'Keep three letters in the same positions and use the definition.',explanation:'Changing L to R turns COLD into CORD, meaning a thick string or rope.'}),
+          q('wordplay','Alphabetical position','Put bridge, bright, brim and bring in alphabetical order. Which word is third?','brim',['bridge','bright','bring'],{stage:4,hint:'All begin bri, so compare the next different letter.',explanation:'The order is bridge (d), bright (g), brim (m), bring (n). The third word is brim.'}),
+          q('wordplay','Use every letter','Which word can be made using L, P, A, N and T exactly once?','PLANT',['PLATE','PLAIN','PLANK'],{stage:2,stimulus:wordBank(['L','P','A','N','T']),hint:'Check both the letters used and the number of times each is used.',explanation:'PLANT uses L, P, A, N and T exactly once. Each other choice introduces a different letter.'}),
+          q('wordplay','Remove either end','Which word makes a new word when either its first letter or its last letter is removed?','PLANE',['STONE','CRATE','SMART'],{stage:5,hint:'Test both removals for every choice; both results must be words.',explanation:'PLANE without P is LANE, and PLANE without E is PLAN. Both are words.'})
+        ],
+        logic:[
+          q('logic','Conclusion must follow','All poets are writers. All writers use words. Does the conclusion All poets use words logically follow?','follows',[],{stage:3,choices:['follows','does not follow'],hint:'Link the two all-statements without adding any outside facts.',explanation:'Every poet is a writer, and every writer uses words, so every poet must use words.'}),
+          q('logic','Conclusion does not follow','All squares are rectangles. Some rectangles are blue. Does the conclusion All squares are blue logically follow?','does not follow',[],{stage:4,choices:['follows','does not follow'],hint:'Some rectangles does not identify which rectangles are blue.',explanation:'The blue rectangles might not be squares. Therefore the conclusion is not guaranteed.'}),
+          q('logic','Age ordering','Maya is older than Leo. Leo is older than Sam. Nora is younger than Sam. Who is oldest?','Maya',['Leo','Sam','Nora'],{stage:2,hint:'Arrange all four people from oldest to youngest.',explanation:'The order is Maya, Leo, Sam, Nora, so Maya is oldest.'}),
+          q('logic','Seating order','Four pupils sit in a row. Amir is left of Beth. Cara is right of Beth. Dylan is left of Amir. Who is second from the left?','Amir',['Beth','Cara','Dylan'],{stage:4,hint:'Place the pupils one clue at a time.',explanation:'The only order is Dylan, Amir, Beth, Cara. Amir is second from the left.'}),
+          q('logic','Day deduction','The club meets after Tuesday but before Thursday. On which day does it meet?','Wednesday',['Monday','Tuesday','Friday'],{stage:1,hint:'Only one day lies strictly between Tuesday and Thursday.',explanation:'Wednesday is after Tuesday and before Thursday.'}),
+          q('logic','Read a facts table','Use the table. Which pupil chose the telescope?','Priya',['Asha','Ben','Cara'],{stage:2,stimulus:codeTable(['Pupil','Project'],[['Asha','volcano'],['Ben','bridge'],['Cara','windmill'],['Priya','telescope']]),hint:'Find telescope, then read the pupil from the same row.',explanation:'Priya and telescope appear in the same row.'}),
+          q('logic','Race order','Ben finished before Eva. Eva finished before Finn. Asha finished after Finn. Who finished first?','Ben',['Eva','Finn','Asha'],{stage:3,hint:'Build a single order from all three clues.',explanation:'The order is Ben, Eva, Finn, Asha. Ben finished first.'}),
+          q('logic','Elimination puzzle','Asha, Ben, Cara and Dylan each chose a different pet: cat, dog, fish or rabbit. Ben chose the dog, Dylan chose the rabbit and Asha chose the fish. Which pet did Cara choose?','cat',['dog','fish','rabbit'],{stage:3,hint:'Cross out the three pets already assigned.',explanation:'Dog, rabbit and fish are already taken, so Cara must have chosen the cat.'}),
+          q('logic','Following directions','Start facing north. Turn right, then right again, then left. Which direction are you facing?','east',['north','south','west'],{stage:3,hint:'Update the direction after every turn.',explanation:'North to east after the first right, east to south after the second right, then south to east after the left turn.'}),
+          q('logic','Conditional reasoning','If the library is open, its lights are on. The lights are on. Does the conclusion The library is open logically follow?','does not follow',[],{stage:5,choices:['follows','does not follow'],hint:'The rule says what happens when the library is open, not that lights can be on only then.',explanation:'The lights could be on for another reason, such as cleaning. The conclusion is possible but not guaranteed, so it does not follow.'})
+        ]
+      };
+      const pool=shuffle(Object.values(groups).flat());
+      const mixed=[];
+      while(pool.length) {
+        let index=pool.findIndex(item=>!mixed.length||item.topic!==mixed[mixed.length-1].topic);
+        if(index<0) index=0;
+        mixed.push(pool.splice(index,1)[0]);
+      }
+      return mixed.map((item,index)=>{
+        item.number=index+1;
+        item.uid='curated-'+String(index+1).padStart(2,'0')+'-'+item.skillId;
+        return item;
+      });
+    }
+    function instantiateV2(entry,number) {
+      const q=polishQuestion(entry.gen(entry.difficulty||((number-1)%5)+1));
+      q.uid=`${entry.id}-${number}-${randomValue().toString(36).slice(2,8)}`; q.entryId=entry.id; q.number=number;
+      q.section=sectionForV2(q.topic); q.title=studentTitleV2(q.title||entry.title); q.kind=q.kind||'mc';
+      if(q.kind==='mc'&&(!q.choices||!q.choices.length)) q.choices=makeTextChoices(q.answer,[]);
+      if(q.kind==='multi') q.selectCount=q.selectCount||(Array.isArray(q.answer)?q.answer.length:2);
+      if(q.kind==='match') q.options=q.options||unique(q.pairs.map(p=>p.right));
+      return q;
+    }
+    function instantiateWithoutRepeatsV2(entries) {
+      const signatures=new Set(),reservedIds=new Set(entries.map(entry=>entry.id));
+      return entries.map((original,index)=>{
+        let candidate=original;
+        const wantedKind=ENTRY_KIND_V2.get(original.id);
+        const alternatives=shuffle(BANK.filter(entry=>entry.topic===original.topic&&ENTRY_KIND_V2.get(entry.id)===wantedKind&&!reservedIds.has(entry.id)));
+        for(let attempt=0;attempt<500;attempt++) {
+          if(attempt>0&&attempt%3===0&&alternatives.length) { candidate=alternatives.pop(); reservedIds.add(candidate.id); }
+          const q=instantiateV2(candidate,index+1);
+          if(!questionIsSuitableV2(q)) continue;
+          const signature=questionSignatureV2(q);
+          if(!signatures.has(signature)) { signatures.add(signature); return q; }
+        }
+        throw new Error(`A unique ${original.topic} ${wantedKind} question could not be created.`);
+      });
+    }
+    function ensureInteractionKindV2(entries,used,kind,target) {
+      let have=entries.filter(entry=>ENTRY_KIND_V2.get(entry.id)===kind).length;
+      while(have<target) {
+        const replaceIndex=entries.findIndex(entry=>ENTRY_KIND_V2.get(entry.id)==='mc'&&BANK.some(candidate=>candidate.topic===entry.topic&&candidate.difficulty===entry.difficulty&&ENTRY_KIND_V2.get(candidate.id)===kind&&!used.has(candidate.id)));
+        if(replaceIndex<0) break;
+        const current=entries[replaceIndex];
+        const candidates=BANK.filter(candidate=>candidate.topic===current.topic&&candidate.difficulty===current.difficulty&&ENTRY_KIND_V2.get(candidate.id)===kind&&!used.has(candidate.id));
+        const replacement=pick(candidates); used.delete(current.id); used.add(replacement.id); entries[replaceIndex]=replacement; have++;
+      }
+    }
+    function createQuestionSetV2(full=true,mock=false) {
+      if(mock) return createCuratedMockV3();
+      const used=new Set(), usedSkills=new Set(), entries=[], spec=full?EXAM_SPEC_V2:SHORT_SPEC_V2;
+      spec.forEach(item=>entries.push(...pickEntriesByTopicV2(item.topic,item.count,used,null,usedSkills)));
+      if(!mock) {
+        ensureInteractionKindV2(entries,used,'multi',full?6:2);
+        ensureInteractionKindV2(entries,used,'match',full?4:1);
+        ensureInteractionKindV2(entries,used,'order',full?4:1);
+      }
+      return instantiateWithoutRepeatsV2(shuffle(entries));
+    }
+
+    function readJSONV2(keyName) { try { return JSON.parse(localStorage.getItem(keyName)||'null'); } catch { return null; } }
+    function writeJSONV2(keyName,value) { try { localStorage.setItem(keyName,JSON.stringify(value)); return true; } catch { return false; } }
+    function removeStoredV2(keyName) { try { localStorage.removeItem(keyName); } catch {} }
+    function savePreferencesV2() {
+      writeJSONV2(PREFS_KEY,{textSize:examElsV2.textSize.value,reduceMotion:examElsV2.reduceMotion.checked,timeAllowance:examElsV2.timeAllowance.value});
+    }
+    function applyPreferencesV2() {
+      document.body.classList.toggle('large-text',examElsV2.textSize.value==='large');
+      document.body.classList.toggle('reduce-motion',examElsV2.reduceMotion.checked);
+    }
+    function loadPreferencesV2() {
+      const prefs=readJSONV2(PREFS_KEY)||{};
+      if(['standard','large'].includes(prefs.textSize)) examElsV2.textSize.value=prefs.textSize;
+      examElsV2.reduceMotion.checked=Boolean(prefs.reduceMotion);
+      if(['0','1','1.25'].includes(String(prefs.timeAllowance))) examElsV2.timeAllowance.value=String(prefs.timeAllowance);
+      applyPreferencesV2();
+    }
+    function savedProgressV2() {
+      const saved=readJSONV2(SAVE_KEY);
+      return saved&&saved.buildId===BUILD_ID&&!saved.finished?saved:null;
+    }
+    function updateResumeAvailabilityV2() {
+      const available=Boolean(savedProgressV2());
+      examElsV2.resumeBtn.classList.toggle('hidden',!available); examElsV2.clearSaveBtn.classList.toggle('hidden',!available);
+    }
+    function saveProgressV2() {
+      if(!examV2.questions.length||examV2.finished||examV2.review) return;
+      writeJSONV2(SAVE_KEY,{
+        buildId:BUILD_ID,mode:examV2.mode,seed:examV2.seed,paperCode:examV2.paperCode,
+        full:examV2.full,mock:examV2.mock,timed:examV2.timed,timeMultiplier:examV2.timeMultiplier,totalSeconds:examV2.totalSeconds,
+        endsAt:examV2.endsAt,index:examV2.index,answers:examV2.answers,flagged:Array.from(examV2.flagged),finished:false
+      });
+      updateResumeAvailabilityV2();
+    }
+    function deleteSavedProgressV2() { removeStoredV2(SAVE_KEY); updateResumeAvailabilityV2(); }
+    function paperCodeForV2(mode,seed,mock) { return mock?'VR-MOCK-01':`VR-${mode.toUpperCase()}-${hashSeed(seed).toString(36).toUpperCase().slice(0,6)}`; }
+    function modeTitleV2(mode,timed) {
+      const base=mode==='mock'?'Full multiple-choice mock':mode==='learning'?'Untimed learning practice':'Mixed skills practice';
+      return timed?base:`${base} · untimed`;
+    }
+    function scrollToTopV2() { window.scrollTo({top:0,behavior:document.body.classList.contains('reduce-motion')?'auto':'smooth'}); }
+    function showExamScreenV2() {
+      examElsV2.startScreen.classList.add('hidden'); examElsV2.resultsScreen.classList.add('hidden'); examElsV2.examScreen.classList.remove('hidden');
+      examElsV2.finishBtn.classList.remove('hidden'); examElsV2.finishBtn.textContent='Finish practice'; examElsV2.flagBtn.textContent='Flag question';
+      examElsV2.reviewFeedback.classList.add('hidden'); examElsV2.prevBtn.disabled=false; examElsV2.nextBtn.disabled=false;
+      examElsV2.examTitle.textContent=modeTitleV2(examV2.mode,examV2.timed); examElsV2.paperCode.textContent=examV2.paperCode;
+    }
+    function startExamV2(config) {
+      clearInterval(examV2.timerId);
+      examV2.mode=config.mode; examV2.full=Boolean(config.full); examV2.mock=Boolean(config.mock); examV2.seed=config.seed;
+      examV2.timeMultiplier=config.timed===false?0:Number(config.timeMultiplier??examElsV2.timeAllowance.value);
+      examV2.timed=config.timed!==false&&examV2.timeMultiplier>0;
+      examV2.paperCode=paperCodeForV2(examV2.mode,examV2.seed,examV2.mock); setRandomSeed(examV2.seed);
+      examV2.questions=createQuestionSetV2(examV2.full,examV2.mock); examV2.answers={}; examV2.flagged=new Set(); examV2.index=0;
+      examV2.results=[]; examV2.score=0; examV2.maxScore=0; examV2.finished=false; examV2.review=false; examV2.timedOut=false;
+      const baseSeconds=examV2.full?3000:1200; examV2.totalSeconds=examV2.timed?Math.round(baseSeconds*examV2.timeMultiplier):0;
+      examV2.endsAt=examV2.timed?Date.now()+examV2.totalSeconds*1000:0; examV2.lastSavedSecond=null;
+      showExamScreenV2(); renderExamQuestionV2();
+      if(examV2.timed) { tickTimerV2(); examV2.timerId=setInterval(tickTimerV2,1000); }
+      else { examElsV2.timer.textContent='Untimed'; examElsV2.timer.classList.remove('low-time'); examElsV2.timer.setAttribute('aria-label','Untimed practice'); }
+      saveProgressV2(); scrollToTopV2();
+    }
+    function resumeExamV2() {
+      const saved=savedProgressV2(); if(!saved) { updateResumeAvailabilityV2(); return; }
+      clearInterval(examV2.timerId);
+      examV2.mode=saved.mode; examV2.full=saved.full; examV2.mock=saved.mock; examV2.seed=saved.seed; examV2.paperCode=saved.paperCode;
+      examV2.timed=saved.timed; examV2.timeMultiplier=saved.timeMultiplier; examV2.totalSeconds=saved.totalSeconds;
+      examV2.endsAt=saved.endsAt; examV2.index=saved.index||0; examV2.answers=saved.answers||{}; examV2.flagged=new Set(saved.flagged||[]);
+      examV2.results=[]; examV2.score=0; examV2.maxScore=0; examV2.finished=false; examV2.review=false; examV2.timedOut=false; examV2.lastSavedSecond=null;
+      setRandomSeed(examV2.seed); examV2.questions=createQuestionSetV2(examV2.full,examV2.mock);
+      showExamScreenV2(); renderExamQuestionV2();
+      if(examV2.timed) { tickTimerV2(); if(!examV2.finished) examV2.timerId=setInterval(tickTimerV2,1000); }
+      else { examElsV2.timer.textContent='Untimed'; examElsV2.timer.classList.remove('low-time'); examElsV2.timer.setAttribute('aria-label','Untimed practice'); }
+      scrollToTopV2();
+    }
+    function tickTimerV2() {
+      if(!examV2.timed) return;
+      const remain=Math.max(0,Math.ceil((examV2.endsAt-Date.now())/1000)),minutes=Math.floor(remain/60),seconds=remain%60;
+      examElsV2.timer.textContent=`${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+      examElsV2.timer.classList.toggle('low-time',remain<=300); examElsV2.timer.setAttribute('aria-label',`${minutes} minutes ${seconds} seconds remaining`);
+      if(remain%15===0&&remain!==examV2.lastSavedSecond) { examV2.lastSavedSecond=remain; saveProgressV2(); }
+      if(remain<=0&&!examV2.finished&&examV2.questions.length) finishExamV2(true);
+    }
+
+    function currentQV2() { return examV2.questions[examV2.index]; }
+    function renderTopV2() {
+      const total=examV2.questions.length,answered=examV2.questions.filter(isAnsweredV2).length;
+      examElsV2.progressText.textContent=`${examV2.review?'Review':'Question'} ${examV2.index+1} of ${total}`;
+      examElsV2.answeredText.textContent=`${answered} answered`; examElsV2.progressFill.style.width=`${((examV2.index+1)/total)*100}%`;
+      examElsV2.meter.setAttribute('aria-valuemax',String(total)); examElsV2.meter.setAttribute('aria-valuenow',String(examV2.index+1));
+      examElsV2.questionNav.innerHTML=examV2.questions.map((q,index)=>{
+        const states=[isAnsweredV2(q)?'answered':'not answered',examV2.flagged.has(q.uid)?'flagged':''].filter(Boolean).join(', ');
+        return `<button type="button" class="nav-btn ${index===examV2.index?'current':''} ${isAnsweredV2(q)?'answered':''} ${examV2.flagged.has(q.uid)?'flagged':''}" data-index="${index}" aria-label="Question ${index+1}: ${states}" ${index===examV2.index?'aria-current="step"':''}>${index+1}</button>`;
+      }).join('');
+      examElsV2.questionNav.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>{examV2.index=Number(btn.dataset.index); examV2.review?renderReviewQuestionV2():renderExamQuestionV2(); saveProgressV2();}));
+      const start=Math.max(0,examV2.index-3),end=Math.min(total,examV2.index+4);
+      examElsV2.miniReview.innerHTML=examV2.questions.slice(start,end).map((q,index)=>`<div class="mini-row"><span>Q${start+index+1}</span><span>${isAnsweredV2(q)?'answered':'not answered'}${examV2.flagged.has(q.uid)?' · flagged':''}</span></div>`).join('');
+    }
+    function renderExamQuestionV2() {
+      if(!examV2.questions.length) return;
+      const q=currentQV2(),max=questionMaxScoreV2(q); renderTopV2();
+      examElsV2.questionNumber.textContent=`Question ${examV2.index+1}`;
+      examElsV2.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">${max} mark${max===1?'':'s'}</span>`;
+      examElsV2.stimulusBox.innerHTML=q.stimulus||''; examElsV2.questionText.textContent=q.prompt; examElsV2.reviewFeedback.classList.add('hidden');
+      examElsV2.flagBtn.textContent=examV2.flagged.has(q.uid)?'Remove flag':'Flag question'; examElsV2.prevBtn.disabled=examV2.index===0;
+      examElsV2.nextBtn.textContent=examV2.index===examV2.questions.length-1?'Finish practice':'Next'; renderAnswerInputV2(q); updateSideV2();
+      examElsV2.questionPanel.focus({preventScroll:true});
+    }
+    function updateSideV2() {
+      const q=currentQV2(),answer=examV2.answers[q.uid];
+      examElsV2.sideSummary.innerHTML=`<strong>${escapeHtml(q.section)}</strong><br>${escapeHtml(q.title)}<br><br><strong>Your answer:</strong><br>${escapeHtml(isAnsweredV2(q)?displayValueV2(answer):'No complete answer selected')}`;
+    }
+    function restoreAnswerFocusV2(info) {
+      requestAnimationFrame(()=>{
+        let target=null;
+        if(info) target=Array.from(examElsV2.answerArea.querySelectorAll(`[data-${info.attr}]`)).find(el=>String(el.dataset[info.attr])===String(info.value));
+        (target||examElsV2.answerArea.querySelector('button:not(:disabled),select:not(:disabled)')||examElsV2.nextBtn).focus();
+      });
+    }
+    function setAnswerV2(q,value,focusInfo) {
+      examV2.answers[q.uid]=cloneAnswerV2(value); renderAnswerInputV2(q); renderTopV2(); updateSideV2(); saveProgressV2(); restoreAnswerFocusV2(focusInfo);
+    }
+    function renderAnswerInputV2(q) {
+      if(q.kind==='multi') return renderMultiInputV2(q);
+      if(q.kind==='order') return renderOrderInputV2(q);
+      if(q.kind==='match') return renderMatchInputV2(q);
+      return renderMCInputV2(q);
+    }
+    function renderMCInputV2(q) {
+      const selected=examV2.answers[q.uid];
+      examElsV2.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((choice,index)=>{const chosen=key(selected||'')===key(choice.value); return `<button type="button" class="choice-btn ${chosen?'selected':''}" data-value="${escapeHtml(choice.value)}" aria-pressed="${chosen}"><span class="choice-letter">${choiceLetters[index]}</span><span>${escapeHtml(choice.label)}</span></button>`;}).join('')}</div>`;
+      examElsV2.answerArea.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>setAnswerV2(q,btn.dataset.value,{attr:'value',value:btn.dataset.value})));
+    }
+    function renderMultiInputV2(q) {
+      const selected=new Set(Array.isArray(examV2.answers[q.uid])?examV2.answers[q.uid].map(String):[]),limit=q.selectCount||q.answer.length;
+      examElsV2.answerArea.innerHTML=`<div class="multi-note">Select ${limit} answer${limit===1?'':'s'}. Each correct selection earns one mark.</div><div class="multi-grid">${q.choices.map(choice=>{const chosen=selected.has(String(choice.value)); return `<button type="button" class="multi-btn ${chosen?'selected':''}" data-value="${escapeHtml(choice.value)}" aria-pressed="${chosen}">${escapeHtml(choice.label)}</button>`;}).join('')}</div>`;
+      examElsV2.answerArea.querySelectorAll('.multi-btn').forEach(btn=>btn.addEventListener('click',()=>{const current=new Set(Array.isArray(examV2.answers[q.uid])?examV2.answers[q.uid]:[]),value=btn.dataset.value; if(current.has(value)) current.delete(value); else if(current.size<limit) current.add(value); setAnswerV2(q,Array.from(current),{attr:'value',value});}));
+    }
+    function renderOrderInputV2(q) {
+      const selected=Array.isArray(examV2.answers[q.uid])?examV2.answers[q.uid].slice():[],selectedKeys=selected.map(key);
+      const remaining=q.tiles.map(String).filter(tile=>{const index=selectedKeys.indexOf(key(tile)); if(index<0) return true; selectedKeys.splice(index,1); return false;});
+      examElsV2.answerArea.innerHTML=`<div class="order-area"><div><strong>Your order:</strong> one mark is available for each correct position.</div><div class="slot-row">${q.answer.map((_,index)=>`<button type="button" class="answer-slot" data-slot="${index}" aria-label="Position ${index+1}: ${escapeHtml(selected[index]||'empty')}">${escapeHtml(selected[index]||'')}</button>`).join('')}</div><div><strong>Choose from:</strong></div><div class="tile-row">${remaining.map(tile=>`<button type="button" class="tile-btn" data-tile="${escapeHtml(tile)}">${escapeHtml(tile)}</button>`).join('')}</div><button type="button" class="secondary" id="clearOrderBtnV2">Clear order</button></div>`;
+      examElsV2.answerArea.querySelectorAll('.tile-btn').forEach(btn=>btn.addEventListener('click',()=>{if(selected.length>=q.answer.length) return; selected.push(btn.dataset.tile); setAnswerV2(q,selected,{attr:'tile',value:btn.dataset.tile});}));
+      examElsV2.answerArea.querySelectorAll('.answer-slot').forEach(btn=>btn.addEventListener('click',()=>{const index=Number(btn.dataset.slot); if(selected[index]) { selected.splice(index,1); setAnswerV2(q,selected,{attr:'slot',value:String(Math.max(0,index-1))}); }}));
+      document.getElementById('clearOrderBtnV2').addEventListener('click',()=>setAnswerV2(q,[],null));
+    }
+    function renderMatchInputV2(q) {
+      const selected=Object.assign({},examV2.answers[q.uid]||{}),options=q.options||unique(q.pairs.map(pair=>pair.right));
+      examElsV2.answerArea.innerHTML=`<div class="multi-note">Each correct match earns one mark.</div><div class="match-area">${q.pairs.map((pair,index)=>`<div class="match-row"><label class="match-term" for="match-v2-${index}">${escapeHtml(pair.left)}</label><select id="match-v2-${index}" data-left="${escapeHtml(pair.left)}"><option value="">Choose…</option>${options.map(option=>`<option value="${escapeHtml(option)}" ${key(selected[pair.left]||'')===key(option)?'selected':''}>${escapeHtml(option)}</option>`).join('')}</select></div>`).join('')}</div>`;
+      examElsV2.answerArea.querySelectorAll('select').forEach(select=>select.addEventListener('change',()=>{selected[select.dataset.left]=select.value; setAnswerV2(q,selected,{attr:'left',value:select.dataset.left});}));
+    }
+    function goV2(delta) { examV2.index=clamp(examV2.index+delta,0,examV2.questions.length-1); renderExamQuestionV2(); saveProgressV2(); }
+
+    function feedbackForReviewV2(q,result) {
+      const rule=q.hint||'Identify the exact relationship or rule before comparing the options.';
+      const working=q.explanation||'Apply the rule carefully to each part of the question.';
+      const prefix=result.correct?'':result.earned>0?'You earned partial credit. ':'Your answer does not fully match the rule. ';
+      return `${prefix}Rule: ${rule} Worked answer: ${working}`;
+    }
+    function finishExamV2(timedOut=false) {
+      if(examV2.finished) return;
+      if(!timedOut) {
+        const blank=examV2.questions.length-examV2.questions.filter(isAnsweredV2).length;
+        const message=blank>0?`You have ${blank} unanswered question${blank===1?'':'s'}. Finish now? You will not be able to change your answers.`:'Finish this practice now? You will not be able to change your answers.';
+        if(!window.confirm(message)) return;
+      }
+      clearInterval(examV2.timerId); examV2.finished=true; examV2.timedOut=timedOut;
+      examV2.results=examV2.questions.map(q=>{const user=examV2.answers[q.uid],score=scoreQuestionV2(q,user); return {q,user,...score};});
+      examV2.score=examV2.results.reduce((sum,result)=>sum+result.earned,0); examV2.maxScore=examV2.results.reduce((sum,result)=>sum+result.max,0);
+      deleteSavedProgressV2(); showResultsV2();
+    }
+    function buildSectionsV2() {
+      const sections={};
+      examV2.results.forEach(result=>{const section=result.q.section; if(!sections[section]) sections[section]={earned:0,max:0,questions:0,missed:0}; sections[section].earned+=result.earned; sections[section].max+=result.max; sections[section].questions++; if(!result.correct) sections[section].missed++;});
+      return sections;
+    }
+    function topicFeedbackV2(section) {
+      if(section.missed===0) return 'No errors in this sample. Use another balanced set to confirm consistency.';
+      return `Review ${section.missed} question${section.missed===1?'':'s'} and practise the rules shown in the worked guidance.`;
+    }
+    function showResultsV2() {
+      examElsV2.examScreen.classList.add('hidden'); examElsV2.resultsScreen.classList.remove('hidden');
+      const pct=examV2.maxScore?Math.round(examV2.score/examV2.maxScore*100):0,sections=buildSectionsV2();
+      examElsV2.scoreDisplay.textContent=`${examV2.score}/${examV2.maxScore}`;
+      examElsV2.percentDisplay.textContent=`${pct}% raw accuracy${examV2.timedOut?' · Time expired':''} · ${examV2.paperCode}`;
+      examElsV2.heatMap.innerHTML=Object.keys(sections).map(name=>{const section=sections[name],sectionPct=Math.round(section.earned/section.max*100); return `<div class="heat-card"><h3>${escapeHtml(name)}</h3><strong>Raw accuracy</strong><div>${section.earned}/${section.max} marks · ${sectionPct}%</div><p>${escapeHtml(topicFeedbackV2(section))}</p></div>`;}).join('');
+      const incomplete=examV2.results.filter(result=>!result.correct),weakest=Object.keys(sections).map(name=>({name,pct:sections[name].earned/sections[name].max})).sort((a,b)=>a.pct-b.pct)[0];
+      examElsV2.overallFeedback.textContent=`Raw practice score only — not age-standardised and not an admissions prediction. ${incomplete.length?`Start by reviewing ${weakest?.name||'the questions below'} and use the rule and worked-answer guidance.`:'No marks were lost in this paper. Confirm the result with another balanced practice set.'}`;
+      examElsV2.resultsReviewList.innerHTML=examV2.results.map((result,index)=>{const stimulus=stimulusForReportV2(result.q); return `<div class="review-item"><div class="review-main"><strong>Q${index+1}: ${escapeHtml(result.q.title)}</strong> <em style="color:#667">(${escapeHtml(result.q.section)})</em>${result.correct?'':`<div class="wrong-explain">${stimulus?`<div><strong>Information shown:</strong> ${escapeHtml(stimulus)}</div>`:''}<div><strong>Question:</strong> ${escapeHtml(result.q.prompt)}</div><div><strong>Your answer:</strong> ${escapeHtml(displayValueV2(result.user))}</div><div><strong>Correct answer:</strong> ${escapeHtml(answerLabelV2(result.q))}</div><div><strong>Rule:</strong> ${escapeHtml(result.q.hint)}</div><div><strong>Worked answer:</strong> ${escapeHtml(result.q.explanation)}</div></div>`}</div><span class="mark ${result.correct?'ok':'no'}">${result.earned}/${result.max}</span></div>`;}).join('');
+      buildPrintResultsV2(sections,pct); scrollToTopV2();
+    }
+    function renderReviewQuestionV2(index=examV2.index) {
+      examV2.review=true; examV2.index=clamp(index,0,examV2.questions.length-1); examElsV2.resultsScreen.classList.add('hidden'); examElsV2.examScreen.classList.remove('hidden');
+      const q=currentQV2(),result=examV2.results[examV2.index]; renderTopV2();
+      examElsV2.questionNumber.textContent=`Review question ${examV2.index+1}`;
+      examElsV2.tagRow.innerHTML=`<span class="tag">${escapeHtml(q.section)}</span><span class="tag">${escapeHtml(q.title)}</span><span class="tag">${result.earned}/${result.max} marks</span>`;
+      examElsV2.stimulusBox.innerHTML=q.stimulus||''; examElsV2.questionText.textContent=q.prompt; renderLockedAnswerV2(q,result);
+      examElsV2.reviewFeedback.className=`feedback ${result.correct?'good':'bad'}`;
+      examElsV2.reviewFeedback.innerHTML=`<strong>${result.correct?'Correct.':'Review the method:'}</strong><br>${escapeHtml(feedbackForReviewV2(q,result))}<br><strong>Your answer:</strong> ${escapeHtml(displayValueV2(result.user))}<br><strong>Correct answer:</strong> ${escapeHtml(answerLabelV2(q))}<br><strong>Marks:</strong> ${result.earned}/${result.max}`;
+      examElsV2.sideSummary.innerHTML=`<strong>Your answer:</strong><br>${escapeHtml(displayValueV2(result.user))}<br><br><strong>Correct answer:</strong><br>${escapeHtml(answerLabelV2(q))}`;
+      examElsV2.flagBtn.textContent='Back to results'; examElsV2.finishBtn.classList.add('hidden'); examElsV2.nextBtn.textContent=examV2.index===examV2.questions.length-1?'Back to results':'Next review'; examElsV2.prevBtn.disabled=examV2.index===0; examElsV2.nextBtn.disabled=false; examElsV2.questionPanel.focus({preventScroll:true});
+    }
+    function renderLockedAnswerV2(q,result) {
+      const user=result.user;
+      if(q.kind==='multi') {
+        const selected=new Set(Array.isArray(user)?user.map(key):[]),answers=new Set(q.answer.map(key));
+        examElsV2.answerArea.innerHTML=`<div class="multi-grid">${q.choices.map(choice=>{const correct=answers.has(key(choice.value)),chosen=selected.has(key(choice.value)),status=correct?'correct answer':chosen?'your answer; not correct':'not selected'; return `<button type="button" disabled class="multi-btn ${correct?'correct':''} ${chosen&&!correct?'wrong':''}" aria-label="${escapeHtml(choice.label)}: ${status}">${escapeHtml(choice.label)}</button>`;}).join('')}</div>`; return;
+      }
+      if(q.kind==='order') {
+        const selected=Array.isArray(user)&&user.length?user:[];
+        examElsV2.answerArea.innerHTML=`<div class="order-area"><strong>Your order</strong><div class="slot-row">${(selected.length?selected:['No answer selected']).map((item,index)=>`<button type="button" disabled class="answer-slot ${key(item)===key(q.answer[index]||'')?'correct':'wrong'}">${escapeHtml(item)}</button>`).join('')}</div><strong>Correct order</strong><div class="slot-row">${q.answer.map(item=>`<button type="button" disabled class="answer-slot correct">${escapeHtml(item)}</button>`).join('')}</div></div>`; return;
+      }
+      if(q.kind==='match') {
+        const selected=user||{};
+        examElsV2.answerArea.innerHTML=`<div class="match-area">${Object.keys(q.answer).map(left=>{const correct=key(selected[left]||'')===key(q.answer[left]); return `<div class="match-row"><div class="match-term">${escapeHtml(left)}</div><div class="match-term ${correct?'correct':'wrong'}">${escapeHtml(selected[left]||'Not answered')} ${correct?'✓':'→ '+escapeHtml(q.answer[left])}</div></div>`;}).join('')}</div>`; return;
+      }
+      examElsV2.answerArea.innerHTML=`<div class="choices">${(q.choices||[]).map((choice,index)=>{const chosen=user!==undefined&&key(user)===key(choice.value),answer=key(q.answer)===key(choice.value),status=answer?'correct answer':chosen?'your answer; not correct':'not selected'; return `<button type="button" disabled class="choice-btn ${answer?'correct':''} ${chosen&&!answer?'wrong':''}" aria-label="${escapeHtml(choice.label)}: ${status}"><span class="choice-letter">${choiceLetters[index]}</span><span>${escapeHtml(choice.label)}</span></button>`;}).join('')}</div>`;
+    }
+    function backToResultsV2() {
+      examV2.review=false; examElsV2.examScreen.classList.add('hidden'); examElsV2.resultsScreen.classList.remove('hidden'); examElsV2.prevBtn.disabled=false; examElsV2.nextBtn.disabled=false; examElsV2.finishBtn.classList.remove('hidden'); examElsV2.finishBtn.textContent='Finish practice'; examElsV2.flagBtn.textContent='Flag question'; scrollToTopV2();
+    }
+
+    function buildPrintResultsV2(sections,pct) {
+      examElsV2.printResults.innerHTML=`<h1>11+ Verbal Reasoning Results</h1><p>Paper: ${escapeHtml(examV2.paperCode)}</p><p>Raw score: ${examV2.score}/${examV2.maxScore} (${pct}%)</p><p>This is raw practice accuracy, not an age-standardised score or admissions prediction.</p><h2>Raw accuracy by topic</h2>${Object.keys(sections).map(name=>{const section=sections[name],sectionPct=Math.round(section.earned/section.max*100); return `<p><strong>${escapeHtml(name)}</strong>: ${section.earned}/${section.max} (${sectionPct}%)</p>`;}).join('')}`;
+    }
+    function htmlToTextV2(value) { const node=document.createElement('div'); node.innerHTML=String(value||'').replace(/<\/(?:span|td|th|tr|div)>/gi,' '); return (node.textContent||'').replace(/\s+/g,' ').trim(); }
+    function stimulusForReportV2(q) {
+      const raw=String(q.stimulus||'');
+      if(!raw) return '';
+      if(/<svg\b/i.test(raw)) return 'Alphabet reference strip supplied with the question.';
+      return htmlToTextV2(raw);
+    }
+    function pdfEscapeV2(value) { return String(value).replace(/£/g,'GBP').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/→/g,'->').replace(/[–—−]/g,'-').replace(/…/g,'...').replace(/×/g,'x').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,'').replace(/\s+/g,' ').replace(/[\\()]/g,'\\$&'); }
+    function wrapPdfLinesV2(lines,max=88) {
+      const wrapped=[];
+      lines.forEach(line=>{const words=String(line).trim().split(/\s+/).filter(Boolean); if(!words.length) { wrapped.push(''); return; } let current=''; words.forEach(original=>{let word=original; while(word.length>max) { if(current) { wrapped.push(current); current=''; } wrapped.push(word.slice(0,max)); word=word.slice(max); } const next=current?`${current} ${word}`:word; if(next.length>max) { wrapped.push(current); current=word; } else current=next; }); if(current) wrapped.push(current);});
+      return wrapped;
+    }
+    function createSimplePdfV2(lines,filename) {
+      const wrappedLines=wrapPdfLinesV2(lines.map(pdfEscapeV2)),pageLines=[]; for(let index=0;index<wrappedLines.length;index+=42) pageLines.push(wrappedLines.slice(index,index+42));
+      const objects=[]; function add(object) { objects.push(object); return objects.length; }
+      add('<< /Type /Catalog /Pages 2 0 R >>'); const pagesIndex=add(''),font=add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'),pageRefs=[];
+      pageLines.forEach(linesOnPage=>{const content='BT /F1 11 Tf 50 790 Td 14 TL '+linesOnPage.map(line=>`(${line}) Tj T*`).join(' ')+' ET'; const contentObject=add(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`); const pageObject=add(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${contentObject} 0 R >>`); pageRefs.push(`${pageObject} 0 R`);});
+      objects[pagesIndex-1]=`<< /Type /Pages /Kids [${pageRefs.join(' ')}] /Count ${pageRefs.length} >>`; let pdf='%PDF-1.4\n'; const offsets=[0]; objects.forEach((object,index)=>{offsets[index+1]=pdf.length; pdf+=`${index+1} 0 obj\n${object}\nendobj\n`;}); const xref=pdf.length; pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`+offsets.slice(1).map(offset=>String(offset).padStart(10,'0')+' 00000 n ').join('\n')+`\ntrailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+      const blob=new Blob([pdf],{type:'application/pdf'}),link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download=filename; document.body.appendChild(link); link.click(); setTimeout(()=>{URL.revokeObjectURL(link.href); link.remove();},500);
+    }
+    function downloadResultsPDFV2() {
+      const pct=examV2.maxScore?Math.round(examV2.score/examV2.maxScore*100):0,sections=buildSectionsV2();
+      const lines=['11+ Verbal Reasoning Detailed Results',`Paper: ${examV2.paperCode}`,`Mode: ${modeTitleV2(examV2.mode,examV2.timed)}`,`Completed: ${new Date().toLocaleString('en-GB')}`,`Raw score: ${examV2.score}/${examV2.maxScore} (${pct}%)`,'This is raw practice accuracy, not an age-standardised score or admissions prediction.','','Raw accuracy by topic:'];
+      Object.keys(sections).forEach(name=>{const section=sections[name],sectionPct=Math.round(section.earned/section.max*100); lines.push(`${name}: ${section.earned}/${section.max} (${sectionPct}%)`);});
+      lines.push('','Questions requiring review:');
+      examV2.results.forEach((result,index)=>{if(!result.correct) { const stimulus=stimulusForReportV2(result.q); lines.push('',`Q${index+1} - ${result.q.section} - ${result.q.title}`); if(stimulus) lines.push(`Information shown: ${stimulus}`); lines.push(`Question: ${htmlToTextV2(result.q.prompt)}`,`Your answer: ${displayValueV2(result.user)}`,`Correct answer: ${answerLabelV2(result.q)}`,`Marks: ${result.earned}/${result.max}`,`Rule: ${result.q.hint}`,`Worked answer: ${result.q.explanation}`); }});
+      if(examV2.results.every(result=>result.correct)) lines.push('No marks were lost in this paper.');
+      createSimplePdfV2(lines,`${examV2.paperCode.toLowerCase().replace(/[^a-z0-9]+/g,'_')}_results.pdf`);
+    }
+
+    examElsV2.startBtn.addEventListener('click',()=>startExamV2({mode:'mock',full:true,mock:true,seed:FIXED_MOCK_SEED,timeMultiplier:Number(examElsV2.timeAllowance.value),timed:Number(examElsV2.timeAllowance.value)>0}));
+    examElsV2.sampleBtn.addEventListener('click',()=>startExamV2({mode:'skills',full:false,mock:false,seed:`VR-SKILLS-${Date.now()}`,timeMultiplier:Number(examElsV2.timeAllowance.value),timed:Number(examElsV2.timeAllowance.value)>0}));
+    examElsV2.learnBtn.addEventListener('click',()=>startExamV2({mode:'learning',full:false,mock:false,seed:`VR-LEARN-${Date.now()}`,timeMultiplier:0,timed:false}));
+    examElsV2.resumeBtn.addEventListener('click',resumeExamV2);
+    examElsV2.clearSaveBtn.addEventListener('click',()=>{if(window.confirm('Delete the saved practice from this device?')) deleteSavedProgressV2();});
+    examElsV2.prevBtn.addEventListener('click',()=>{if(examV2.review) renderReviewQuestionV2(examV2.index-1); else goV2(-1);});
+    examElsV2.nextBtn.addEventListener('click',()=>{if(examV2.review) { if(examV2.index<examV2.questions.length-1) renderReviewQuestionV2(examV2.index+1); else backToResultsV2(); } else if(examV2.index<examV2.questions.length-1) goV2(1); else finishExamV2(false);});
+    examElsV2.flagBtn.addEventListener('click',()=>{if(examV2.review) { backToResultsV2(); return; } const q=currentQV2(); if(examV2.flagged.has(q.uid)) examV2.flagged.delete(q.uid); else examV2.flagged.add(q.uid); examElsV2.flagBtn.textContent=examV2.flagged.has(q.uid)?'Remove flag':'Flag question'; renderTopV2(); updateSideV2(); saveProgressV2();});
+    examElsV2.finishBtn.addEventListener('click',()=>{if(examV2.review) backToResultsV2(); else finishExamV2(false);});
+    examElsV2.downloadPdfBtn.addEventListener('click',downloadResultsPDFV2); examElsV2.reviewBtn.addEventListener('click',()=>renderReviewQuestionV2(0));
+    examElsV2.retakeBtn.addEventListener('click',()=>{examElsV2.resultsScreen.classList.add('hidden'); examElsV2.startScreen.classList.remove('hidden'); updateResumeAvailabilityV2(); scrollToTopV2();});
+    examElsV2.textSize.addEventListener('change',()=>{applyPreferencesV2(); savePreferencesV2();});
+    examElsV2.reduceMotion.addEventListener('change',()=>{applyPreferencesV2(); savePreferencesV2();}); examElsV2.timeAllowance.addEventListener('change',savePreferencesV2);
+    window.addEventListener('pagehide',saveProgressV2);
+    loadPreferencesV2(); updateResumeAvailabilityV2();
   </script>
 </body>
 </html>
